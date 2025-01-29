@@ -239,31 +239,159 @@
                 flex: 0 0 40%;
             }
         }
+            .music-control {
+        position: fixed;
+        left: 20px;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 1000;
+    }
+
+    .play-pause-btn {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 20px;
+        border-radius: 15px;
+        border: none;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        color: white;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 16px;
+    }
+
+    .play-pause-btn:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: scale(1.05);
+    }
+
+    .play-pause-btn:active {
+        transform: scale(0.95);
+    }
+
+    .status-text {
+        font-size: 14px;
+    }
+
+    @media (max-width: 768px) {
+        .music-control {
+            left: 10px;
+        }
+
+        .play-pause-btn {
+            padding: 8px 15px;
+            font-size: 14px;
+        }
+    }
+    .music-control {
+    transition: all 0.3s ease;
+}
+
+.music-control.collapsed {
+    left: 3px;
+}
+
+.music-control.collapsed .status-text {
+    width: 0;
+    overflow: hidden;
+    opacity: 0;
+}
+
+.collapsed .play-pause-btn {
+    padding: 12x;
+    border-radius: 50%;
+    width: 40px;          
+    height: 40px;
+}
+
+.status-text {
+    transition: all 0.3s ease;
+    width: auto;
+    opacity: 1;
+}
     </style>
 </head>
 <body>
-				<audio id="background-music" autoplay loop>
-    <source src="./Audio.mp3" type="audio/mpeg">
-    您的浏览器不支持 audio 元素。
-</audio>
-
-<div id="music-prompt" class="music-prompt" style="display: none; position: fixed; top: 10px; right: 10px; background-color: rgba(255, 255, 255, 0.8); padding: 10px; border-radius: 5px; font-size: 14px;">
-    点击播放背景音乐
+				
+<div id="music-control" class="music-control expanded">
+    <audio id="background-music" loop>
+        <source src="./Audio" type="audio/mpeg">
+        您的浏览器不支持 audio 元素。
+    </audio>
+    <button id="play-pause-btn" class="play-pause-btn">
+        <span id="play-icon">▶</span>
+        <span id="pause-icon" style="display: none;">▌▌</span>
+        <span class="status-text">播放</span>
+    </button>
 </div>
 
+
 <script>
-    const backgroundMusic = document.getElementById('background-music');
+				const musicControl = document.getElementById('music-control');
+				let collapseTimeout;
 
-    // 检查是否允许自动播放
-    if (!backgroundMusic.autoplay) {
-        document.querySelector('.music-prompt').style.display = 'block';
+function startCollapseTimer() {
+    clearTimeout(collapseTimeout);
+    collapseTimeout = setTimeout(() => {
+        musicControl.classList.add('collapsed');
+    }, 3000);
+}
 
-        // 添加点击事件以手动播放音乐
-        document.querySelector('.music-prompt').addEventListener('click', () => {
-            backgroundMusic.play();
-            document.querySelector('.music-prompt').style.display = 'none';
-        });
+musicControl.addEventListener('click', (e) => {
+    if (musicControl.classList.contains('collapsed')) {
+        musicControl.classList.remove('collapsed');
+        startCollapseTimer();
     }
+});
+
+musicControl.addEventListener('mouseenter', () => {
+    clearTimeout(collapseTimeout);
+    musicControl.classList.remove('collapsed');
+});
+
+musicControl.addEventListener('mouseleave', () => {
+    startCollapseTimer();
+});
+
+// 页面加载后启动收缩计时器
+startCollapseTimer();
+       const backgroundMusic = document.getElementById('background-music');
+    const playPauseBtn = document.getElementById('play-pause-btn');
+    const playIcon = document.getElementById('play-icon');
+    const pauseIcon = document.getElementById('pause-icon');
+    const statusText = document.querySelector('.status-text');
+
+    let isPlaying = false;
+
+    playPauseBtn.addEventListener('click', togglePlay);
+
+    function togglePlay() {
+        if (isPlaying) {
+            backgroundMusic.pause();
+        } else {
+            backgroundMusic.play();
+        }
+        
+        updatePlayStatus();
+    }
+
+    function updatePlayStatus() {
+        isPlaying = !backgroundMusic.paused;
+        playIcon.style.display = isPlaying ? 'none' : 'inline';
+        pauseIcon.style.display = isPlaying ? 'inline' : 'none';
+        statusText.textContent = isPlaying ? '正在播放' : '播放';
+    }
+
+    // 监听音频播放状态
+    backgroundMusic.addEventListener('playing', updatePlayStatus);
+    backgroundMusic.addEventListener('pause', updatePlayStatus);
+
+    // 页面加载时检查自动播放状态
+    backgroundMusic.play().catch(() => {
+        updatePlayStatus();
+    });
 </script>
     <div class="container">
         <div class="avatar-container">
@@ -305,7 +433,10 @@
             <a href="https://www.coolapk.com/u/星河间v" target="_blank">
                 <img class="social-icon" src="./coolapk.png" alt="酷安">
             </a>
-        </div>
+    <a href="https://m.bilibili.com/space/3546662333057074" target="_blank">
+        <img class="social-icon" src="./bilibili.png" alt="bilibili">
+    </a>
+</div>
         <div class="running-time" id="running-time">网站已运行：0天0小时0分0秒</div>
     </div>
 
@@ -335,7 +466,7 @@
         }
 
         function calculateRunningTime() {
-            const startTime = new Date('修改启用时间').getTime(); // 修改为您的网站启动时间
+            const startTime = new Date('2025-1-29').getTime(); // 修改为您的网站启动时间
             const now = new Date().getTime();
             const difference = now - startTime;
 
