@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>星河间的小站</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        body {
+        -webkit-tap-highlight-color: transparent;
+            min-height: 100vh;
+            background-image: url('https://bing.img.run/1920x1080.php');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            display: flex;
+                        flex-direction: column;
+            align-items: center;
+            color: white;
+        }
+
+        .dark-mode {
+            background: linear-gradient(135deg, #1a1a1a 0%, #434343 100%);
+        }
+
+        .dark-mode .site-card,
+        .dark-mode .quote,
+        .dark-mode .footer {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            padding: 20px;
+            margin-top: 50px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .avatar-container {
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 75px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
+            background: #f0f0f0;
+        }
+
+        .nickname {
+            position: absolute;
+            width: 100%;
+            text-align: center;
+            bottom: -40px;
+            font-size: 1.5em;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+        }
+
+        .avatar-container:hover .avatar {
+            transform: scale(1.1);
+        }
+
+        .avatar-container:hover .nickname {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .time-container {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .time {
+            font-size: 3em;
+            font-weight: 300;
+            margin-bottom: 10px;
+        }
+
+        .date {
+            font-size: 1.2em;
+            opacity: 0.8;
+        }
+
+        .quote {
+            text-align: center;
+            font-size: 1.2em;
+            font-style: italic;
+            margin: 20px 0;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 10px;
+            transform: translateY(30px);
+            opacity: 0;
+            animation: fadeInUp 0.5s ease forwards;
+        }
+
+        .sites-container {
+            width: 100%;
+            max-width: 600px;
+            margin-top: 30px;
+            transform: translateY(50px);
+            opacity: 0;
+            animation: fadeInUp 0.5s ease 0.3s forwards;
+        }
+
+        .site-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .site-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .site-card:active {
+            transform: scale(0.98);
+        }
+
+        .site-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+        }
+
+        .site-info {
+            flex-grow: 1;
+        }
+
+        .site-name {
+            font-size: 1.2em;
+            margin-bottom: 5px;
+        }
+
+        .footer {
+            margin-top: 50px;
+            text-align: center;
+            padding: 20px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .social-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            filter: brightness(1);
+        }
+
+        .social-icon:hover {
+            transform: scale(1.2) rotate(360deg);
+            filter: brightness(1.2);
+        }
+
+        .running-time {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 10px;
+            }
+
+            .time {
+                font-size: 2em;
+            }
+
+            .quote {
+                font-size: 1em;
+            }
+        }
+
+        @media (orientation: landscape) and (min-width: 1024px) {
+            .container {
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+                max-width: 1200px;
+            }
+
+            .avatar-container {
+                flex: 0 0 200px;
+            }
+
+            .time-container {
+                flex: 0 0 100%;
+            }
+
+            .quote {
+                flex: 0 0 60%;
+            }
+
+            .sites-container {
+                flex: 0 0 40%;
+            }
+        }
+    </style>
+</head>
+<body>
+				<audio id="background-music" autoplay loop>
+    <source src="./Audio.mp3" type="audio/mpeg">
+    您的浏览器不支持 audio 元素。
+</audio>
+
+<div id="music-prompt" class="music-prompt" style="display: none; position: fixed; top: 10px; right: 10px; background-color: rgba(255, 255, 255, 0.8); padding: 10px; border-radius: 5px; font-size: 14px;">
+    点击播放背景音乐
+</div>
+
+<script>
+    const backgroundMusic = document.getElementById('background-music');
+
+    // 检查是否允许自动播放
+    if (!backgroundMusic.autoplay) {
+        document.querySelector('.music-prompt').style.display = 'block';
+
+        // 添加点击事件以手动播放音乐
+        document.querySelector('.music-prompt').addEventListener('click', () => {
+            backgroundMusic.play();
+            document.querySelector('.music-prompt').style.display = 'none';
+        });
+    }
+</script>
+    <div class="container">
+        <div class="avatar-container">
+            <img class="avatar" src="./head.png" alt="头像">
+            <div class="nickname">星河间</div>
+        </div>
+
+        <div class="time-container">
+            <div class="time" id="current-time">00:00:00</div>
+            <div class="date" id="current-date">2024年1月1日</div>
+        </div>
+
+        <div class="quote" id="hitokoto">
+            加载中...
+        </div>
+
+        <div class="sites-container">
+            <a href="站点一名称" class="site-card" target="_blank">
+                <img class="site-icon" src="./toolkit.png" alt="REClink">
+                <div class="site-info">
+                    <div class="site-name">Tool kit 在线小工具</div>
+                </div>
+            </a>
+
+            <a href="Toolkit" class="site-card" target="_blank">
+                <img class="site-icon" src="图标URL" alt="站点2图标">
+                <div class="site-info">
+                    <div class="site-name">建设中…</div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div class="social-links">
+            <a href="https://github.com/GitXhj" target="_blank">
+                <img class="social-icon" src="./github.png" alt="GitHub">
+            </a>
+            <a href="https://www.coolapk.com/u/星河间v" target="_blank">
+                <img class="social-icon" src="./coolapk.png" alt="酷安">
+            </a>
+        </div>
+        <div class="running-time" id="running-time">网站已运行：0天0小时0分0秒</div>
+    </div>
+
+    <script>
+        function updateTime() {
+            const now = new Date();
+            const timeElement = document.getElementById('current-time');
+            const dateElement = document.getElementById('current-date');
+            
+            timeElement.textContent = now.toLocaleTimeString('zh-CN');
+            dateElement.textContent = now.toLocaleDateString('zh-CN', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        }
+
+        async function fetchHitokoto() {
+            try {
+                const response = await fetch('https://v1.hitokoto.cn/?c=a&c=d&c=i&c=j&c=k&c=l&c=n&c=r&c=t&c=m&c=p&c=e&c=f&c=h');
+                const data = await response.json();
+                document.querySelector('#hitokoto').textContent = data.hitokoto;
+            } catch (error) {
+                console.error('获取一言失败:', error);
+                document.querySelector('#hitokoto').textContent = '生活不止眼前的苟且，还有诗和远方的田野。';
+            }
+        }
+
+        function calculateRunningTime() {
+            const startTime = new Date('修改启用时间').getTime(); // 修改为您的网站启动时间
+            const now = new Date().getTime();
+            const difference = now - startTime;
+
+            const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+
+            document.getElementById('running-time').textContent = 
+                `网站已运行：${days}天${hours}小时${minutes}分${seconds}秒`;
+        }
+
+        function checkDarkMode() {
+            const hour = new Date().getHours();
+            if (hour >= 23 || hour < 2) {
+                document.body.classList.add('dark-mode');
+            } else {
+                document.body.classList.remove('dark-mode');                        
+            }
+        }
+
+        // 初始化
+setInterval(updateTime, 1000);
+        updateTime();
+        
+        const avatarContainer = document.querySelector('.avatar-container');
+        avatarContainer.addEventListener('click', function() {
+            this.style.transform = 'scale(0.9)';
+            setTimeout(() => {
+                this.style.transform = 'scale(1)';
+            }, 150);
+        });
+
+        fetchHitokoto();
+        setInterval(fetchHitokoto, 300000); // 每5分钟更新一次一言
+        
+        setInterval(calculateRunningTime, 1000);
+        calculateRunningTime();
+        
+        checkDarkMode();
+        setInterval(checkDarkMode, 60000); // 每分钟检查一次是否需要切换深色模式
+    </script>
+</body>
+    </script>
+</body>
+</html>
