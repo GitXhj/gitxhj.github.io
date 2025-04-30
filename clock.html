@@ -1,0 +1,129 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+				<meta name="screen-orientation" content="nosleep">
+<head>
+<title>Wallpaper Clock</title>
+<style type="text/css">
+html, body {
+    touch-action: pan-x pan-y; /* 只允许水平和垂直滚动 */
+}
+* {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+a {
+  text-decoration: none;
+}
+    button:focus {
+    outline: none;
+}
+button, a {
+    outline: none;
+}
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+}
+
+#container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.wallpaper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    transition: opacity 2s;
+}
+
+#wallpaper1 {
+    opacity: 1;
+}
+
+#wallpaper2 {
+    opacity: 0;
+}
+
+#clock {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: Arial, sans-serif;
+    font-size: 111px;
+    color: white;
+    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
+    z-index: 100;
+}
+</style>
+</head>
+<body>
+<div id="container">
+    <div id="wallpaper1" class="wallpaper"></div>
+    <div id="wallpaper2" class="wallpaper"></div>
+    <div id="clock"></div>
+</div>
+
+<script type="text/javascript">
+
+
+function updateClock() {
+    var now = new Date();
+    var hours = now.getHours();
+    var minutes = now.getMinutes();
+    var seconds = now.getSeconds();
+    
+    hours = hours < 10 ? "0" + hours : hours;
+    minutes = minutes < 10 ? "0" + minutes : minutes;
+    seconds = seconds < 10 ? "0" + seconds : seconds;
+    
+    document.getElementById("clock").innerHTML = hours + ":" + minutes + ":" + seconds;
+}
+
+function setWallpaper(element, url) {
+    element.style.backgroundImage = "url('" + url + "?" + new Date().getTime() + "')";
+}
+
+function toggleWallpaper() {
+    var wp1 = document.getElementById("wallpaper1");
+    var wp2 = document.getElementById("wallpaper2");
+    var wallpaperUrl1 = 'https://dailybing.com/api/v1/'; // 替换为第一张壁纸URL
+    var wallpaperUrl2 = 'https://dailybing.com/api/v1/'; // 替换为第二张壁纸URL
+    
+    if (wp1.style.opacity == "1" || wp1.style.opacity == "") {
+        setWallpaper(wp2, wallpaperUrl2);
+        wp1.style.opacity = "0";
+        wp2.style.opacity = "1";
+    } else {
+        setWallpaper(wp1, wallpaperUrl1);
+        wp1.style.opacity = "1";
+        wp2.style.opacity = "0";
+    }
+}
+
+// 初始化第一张壁纸
+setWallpaper(document.getElementById("wallpaper1"), 'https://dailybing.com/api/v1/');
+
+// 更新时钟，每秒更新一次
+setInterval(updateClock, 1000);
+
+// 更换壁纸，每5分钟更换一次
+setInterval(toggleWallpaper, 60000);
+
+// 初始化时钟显示
+updateClock();
+</script>
+</body>
+</html>
