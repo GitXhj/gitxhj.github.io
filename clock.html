@@ -99,8 +99,8 @@ function setWallpaper(element, url) {
 function toggleWallpaper() {
     var wp1 = document.getElementById("wallpaper1");
     var wp2 = document.getElementById("wallpaper2");
-    var wallpaperUrl1 = 'https://dailybing.com/api/v1/'; // 替换为第一张壁纸URL
-    var wallpaperUrl2 = 'https://dailybing.com/api/v1/'; // 替换为第二张壁纸URL
+    var wallpaperUrl1 = 'http://api.timecdn.cn/libs/wallpaper/v1/'; // 替换为第一张壁纸URL
+    var wallpaperUrl2 = 'http://api.timecdn.cn/libs/wallpaper/v1/'; // 替换为第二张壁纸URL
     
     if (wp1.style.opacity == "1" || wp1.style.opacity == "") {
         setWallpaper(wp2, wallpaperUrl2);
@@ -114,7 +114,7 @@ function toggleWallpaper() {
 }
 
 // 初始化第一张壁纸
-setWallpaper(document.getElementById("wallpaper1"), 'https://dailybing.com/api/v1/');
+setWallpaper(document.getElementById("wallpaper1"), 'http://api.timecdn.cn/libs/wallpaper/v1/');
 
 // 更新时钟，每秒更新一次
 setInterval(updateClock, 1000);
