@@ -346,3 +346,4 @@ function initializeOriginalFunctions() {
     checkDarkMode();
     setInterval(checkDarkMode, 60000); // Check dark mode every minute
 }
+<!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "afe56ce9d3db4562aa944fce6924a841"}'></script><!-- End Cloudflare Web Analytics -->
