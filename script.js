@@ -56,7 +56,7 @@ window.addEventListener('load', () => {
 // Fetch hitokoto
 async function fetchHitokoto() {
     try {
-        const response = await fetch('https://v1.hitokoto.cn/?c=a&c=d&c=i&c=j&c=k&c=l&c=n&c=r&c=t&c=m&c=p&c=e&c=f&c=h');
+        const response = await fetch('https://v1.hitokoto.cn/');
         const data = await response.json();
         hitokotoText = data.hitokoto;
         // Also set the hitokoto for the main content
