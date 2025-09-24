@@ -38,3 +38,14 @@ sbit LCD_SCK = P1^7; // 时钟
 sbit LCD_REST = P0^1; // 复位
 
 这下我的硬件连接没有问题，问题出现在哪里？给我一个示例代码
+
+<hr>
+若使用 Adafruit_ST7735 库：
+
+在 setup() 中，尝试使用正确的 tft.initR(INITR_REDTAB); 或 tft.initR(INITR_GREENTAB);。
+如果仍有问题，尝试手动添加 tft.setOffset(X, Y); 来调整X/Y偏移量（例如 tft.setOffset(2, 1);）。
+<p>
+若使用 TFT_eSPI 库：
+
+在 User_Setup.h 中，确保 ST7735_DRIVER 已启用。
+最关键： 取消注释适合您128x160屏幕的宏，如 #define ST7735_REDTAB 或 #define ST7735_GREENTAB (先尝试RedTab)，并注释掉其他。这些宏会自动处理偏移。
