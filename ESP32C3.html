@@ -49,3 +49,10 @@ sbit LCD_REST = P0^1; // 复位
 
 在 User_Setup.h 中，确保 ST7735_DRIVER 已启用。
 最关键： 取消注释适合您128x160屏幕的宏，如 #define ST7735_REDTAB 或 #define ST7735_GREENTAB (先尝试RedTab)，并注释掉其他。这些宏会自动处理偏移。
+<p>
+轮播chifeng天气情况，温度等信息。每次亮屏后重新请求更新信息
+API：https://api.openweathermap.org/data/2.5/weather?q=chifeng,cn&APPID=14e84a4651240adcf70dc72bfd1e7381&units=metric&lang=zh_cn
+
+请求方式：GET/POST
+返回示例（json）
+{"coord":{"lon":118.9636,"lat":42.2683},"weather":[{"id":803,"main":"Clouds","description":"多云","icon":"04n"}],"base":"stations","main":{"temp":14.91,"feels_like":13.53,"temp_min":14.91,"temp_max":14.91,"pressure":1020,"humidity":41,"sea_level":1020,"grnd_level":945},"visibility":10000,"wind":{"speed":1.28,"deg":61,"gust":1.27},"clouds":{"all":59},"dt":1758375308,"sys":{"country":"CN","sunrise":1758318543,"sunset":1758362786},"timezone":28800,"id":2038067,"name":"Chifeng","cod":200}
