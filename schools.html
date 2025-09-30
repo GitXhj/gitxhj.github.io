@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>深度报道：新闻采访报告示例</title>
+    <!-- MDUI CSS CDN -->
+    <link rel="stylesheet" href="https://unpkg.com/mdui@1.0.2/dist/css/mdui.min.css"/>
+    <style>
+        /* 确保页面和幻灯片占据整个视口，兼容大屏和横屏 */
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* 防止滚动条出现 */
+            font-family: 'Roboto', 'Noto Sans SC', sans-serif;
+            background-color: #f7f7f9; /* MD3 风格的背景色 */
+        }
+
+        /* 幻灯片容器基础样式 */
+        .slide {
+            height: 100vh;
+            width: 100vw;
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: none; /* 默认隐藏 */
+            padding: 24px;
+            box-sizing: border-box;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        /* 幻灯片 1: 居中布局 */
+        #slide-1 {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        /* 幻灯片 3 (原 slide-2): 视频布局 - 核心修改区域 */
+        #slide-3-video .content-wrapper {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        #slide-3-video .video-container {
+            flex-grow: 1;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0;
+            position: relative; /* 确保内部元素定位 */
+        }
+        
+        /* 视频 iframe 样式：保持横屏比例 */
+        #slide-3-video .video-responsive {
+            position: relative;
+            width: 100%;
+            max-width: 1000px; /* 限制最大宽度 */
+            padding-bottom: 56.25%; /* 16:9 比例 (9 / 16 * 100%) */
+            height: 0;
+            overflow: hidden;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        #slide-3-video iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+
+        /* 按钮区域：右侧对齐并垂直居中 */
+        #slide-3-video .control-area {
+            width: 100%;
+            display: flex;
+            justify-content: flex-end; /* 按钮靠右 */
+            align-items: center;
+            padding-bottom: 20px;
+        }
+        #slide-3-video .control-buttons {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        /* 幻灯片 5 (原 slide-4): 标题和右侧文字布局 */
+        #slide-5-team .content-wrapper {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: flex-start;
+        }
+        #slide-5-team .footer-info {
+            width: 100%;
+            margin-top: auto; /* 推到底部 */
+            padding-top: 20px;
+            display: flex;
+            justify-content: space-between; /* 主标题在左，小文字在右 */
+            align-items: flex-end;
+        }
+        
+        /* MD3 风格的按钮 */
+        .mdui-btn-next {
+            border-radius: 28px; /* 更圆润的按钮 */
+            min-height: 56px;
+            padding: 0 24px;
+            font-weight: 500;
+            text-transform: none;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* 字体样式 */
+        .display-large {
+            font-size: 3.5rem; /* MD3 Display Large */
+            font-weight: 700;
+            color: #1c1b1f;
+        }
+        .headline-medium {
+            font-size: 2rem; /* MD3 Headline Medium */
+            font-weight: 500;
+            color: #49454f;
+        }
+        .title-small {
+            font-size: 1rem; /* MD3 Title Small */
+            font-weight: 500;
+            color: #625b71;
+        }
+        .body-large {
+            font-size: 1.125rem; /* MD3 Body Large */
+            line-height: 1.6;
+            color: #49454f;
+        }
+        .body-small {
+            font-size: 0.875rem; /* MD3 Body Small */
+            line-height: 1.4;
+            color: #625b71;
+        }
+    </style>
+</head>
+<body class="mdui-theme-primary-indigo mdui-theme-accent-pink">
+
+    <!-- 幻灯片 1: 标题页 (内容已修改为示例) -->
+    <div id="slide-1" class="slide" style="display: flex;">
+        <h1 class="display-large">深度报道：新闻采访报告示例</h1>
+        <p class="headline-medium mdui-m-t-2">主题：青春期家长访谈与沟通挑战</p>
+        <button class="mdui-btn mdui-btn-raised mdui-color-theme-accent mdui-m-t-5 mdui-btn-next" onclick="nextSlide()">
+            开始阅读 <i class="mdui-icon material-icons">arrow_forward</i>
+        </button>
+    </div>
+
+    <!-- 幻灯片 2: 采访提纲页 (新增) -->
+    <div id="slide-2-outline" class="slide">
+        <div class="content-wrapper mdui-container" style="height: 100%; display: flex; flex-direction: column; justify-content: center;">
+            <h2 class="headline-medium mdui-m-b-3 mdui-text-color-theme-primary mdui-text-center">采访提纲示例</h2>
+            
+            <!-- 提纲表格 -->
+            <div class="mdui-table-fluid mdui-m-b-4">
+                <table class="mdui-table mdui-table-hoverable">
+                    <thead>
+                        <tr>
+                            <th>项目</th>
+                            <th>内容</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>采访对象</td>
+                            <td>示例家长 (虚构)</td>
+                        </tr>
+                        <tr>
+                            <td>采访目的</td>
+                            <td>了解初高中阶段家长在亲子沟通中遇到的困扰与应对方式。</td>
+                        </tr>
+                        <tr>
+                            <td>主要问题数量</td>
+                            <td>6 个核心问题</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- 查看全部问题按钮 -->
+            <div class="mdui-text-center">
+                <!-- 点击按钮后打开对话框 (Dialog) -->
+                <button class="mdui-btn mdui-btn-raised mdui-color-theme-accent mdui-btn-next" mdui-dialog="{target: '#dialog-questions'}">
+                    查看全部采访问题 <i class="mdui-icon material-icons">list_alt</i>
+                </button>
+                <button class="mdui-btn mdui-btn-raised mdui-color-theme-primary mdui-m-l-2 mdui-btn-next" onclick="nextSlide()">
+                    跳过提纲，继续阅读 <i class="mdui-icon material-icons">arrow_forward</i>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 采访问题对话框 (Dialog) - 不属于幻灯片，但需放在 body 内 -->
+    <div class="mdui-dialog" id="dialog-questions">
+        <div class="mdui-dialog-title">全部采访问题 (示例)</div>
+        <div class="mdui-dialog-content">
+            <ol class="body-large">
+                <li>您家是否有孩子处于初高中阶段？</li>
+                <li>请问您家孩子是否有明显的青春期变化（如独立意识增强、情绪波动、关注同伴关系等）？</li>
+                <li>在与孩子的沟通中，您是否遇到了因青春期变化带来的困扰？请您描述一个具体的场景。</li>
+                <li>面对这些困扰，您目前尝试了哪些应对或解决办法？您认为哪种方法最有效？</li>
+                <li>您是否曾寻求过外部资源（如学校老师、心理咨询师、育儿书籍等）的帮助？效果如何？</li>
+                <li>面对孩子的青春期，您自身的压力或情绪是如何调节的？</li>
+            </ol>
+            <p class="body-large mdui-m-t-3">
+                <br>
+                非常感谢您的参与，祝您生活愉快！
+            </p>
+        </div>
+        <div class="mdui-dialog-actions">
+            <button class="mdui-btn mdui-ripple mdui-text-color-theme-accent" mdui-dialog-close>关闭</button>
+        </div>
+    </div>
+
+    <!-- 幻灯片 3: 视频页 (原 slide-2，内容已修改为示例) -->
+    <div id="slide-3-video" class="slide">
+        <div class="content-wrapper">
+            <!-- 小标题在最左侧顶部 -->
+            <h2 class="title-small mdui-text-color-theme-accent">现场直击：视频片段示例</h2>
+            
+            <!-- 视频在中间 -->
+            <div class="video-container">
+                <div class="video-responsive">
+                    <!-- 视频占位符，请替换 'YOUR_VIDEO_URL_HERE' 为实际的视频嵌入 URL -->
+                    <iframe 
+                        id="interview-video"
+                        src="视频URL" 
+                        title="采访视频片段" 
+                        frameborder="0" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                        allowfullscreen>
+                    </iframe>
+                </div>
+            </div>
+            
+            <!-- 按钮区域：移到右侧居中 -->
+            <div class="control-area">
+                <div class="control-buttons">
+                    <!-- 全屏按钮 -->
+                    <button class="mdui-btn mdui-btn-icon mdui-color-theme-accent mdui-m-b-2" onclick="toggleFullScreen()">
+                        <i class="mdui-icon material-icons">fullscreen</i>
+                    </button>
+                    <!-- 下一页按钮 -->
+                    <button class="mdui-btn mdui-btn-raised mdui-color-theme-accent mdui-btn-next" onclick="nextSlide()">
+                        继续阅读报告 <i class="mdui-icon material-icons">arrow_forward</i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 幻灯片 4: 示例文字页 (原 slide-3，内容已修改为示例，并加入图片占位符) -->
+    <div id="slide-4-transcript" class="slide mdui-container">
+        <div class="mdui-row mdui-m-t-5">
+            <div class="mdui-col-xs-12 mdui-col-md-8 mdui-col-md-offset-2">
+                <h2 class="headline-medium mdui-m-b-3 mdui-text-color-theme-primary">采访实录与核心观点 (示例)</h2>
+                
+                <p class="body-large">
+                    **记者问：** “您提到孩子进入青春期后变化很大。在与孩子的沟通中，您遇到了哪些具体的困扰？”
+                </p>
+                
+                <div class="mdui-row mdui-m-b-3">
+                    <div class="mdui-col-xs-12 mdui-col-sm-8">
+                        <p class="body-large">
+                            **示例家长答：** “最大的困扰是‘关门’。以前什么都愿意说，现在一回家就回房间，问什么都说‘不知道’或‘别管我’。感觉我们之间的距离越来越远了。”
+                        </p>
+                    </div>
+                    <div class="mdui-col-xs-12 mdui-col-sm-4 mdui-text-center">
+                        <!-- 示例图片 1 (图文并茂) -->
+                        <img src="https://via.placeholder.com/200x150?text=Parent+Stress+Graph" alt="家长压力图表" class="mdui-img-responsive mdui-shadow-1 mdui-m-t-1" style="border-radius: 8px;">
+                    </div>
+                </div>
+
+                <p class="body-large">
+                    **记者问：** “面对这种‘关门’现象，您尝试了哪些应对方法？”
+                </p>
+                
+                <p class="body-large">
+                    **示例家长答：** “我们尝试过硬碰硬，但效果很差。后来我们尝试了‘示弱’和‘陪伴’，比如一起看电影，不提学习，反而能聊上几句。现在我们意识到，理解比说教更重要。”
+                </p>
+                
+                <div class="mdui-row mdui-m-b-3">
+                    <div class="mdui-col-xs-12 mdui-col-sm-4 mdui-text-center">
+                        <!-- 示例图片 2 (图文并茂) -->
+                        <img src="https://via.placeholder.com/200x150?text=Family+Communication" alt="家庭沟通示意图" class="mdui-img-responsive mdui-shadow-1 mdui-m-t-1" style="border-radius: 8px;">
+                    </div>
+                    <div class="mdui-col-xs-12 mdui-col-sm-8">
+                        <p class="body-large">
+                            **报告分析：** 示例家长的经历反映了青春期家庭沟通的普遍挑战。核心在于家长角色的转变，从权威者转变为支持者和倾听者。图 1 和图 2 展示了家庭沟通模式对青少年心理健康的影响数据。
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 下一页按钮 -->
+        <div class="mdui-m-t-5 mdui-text-center">
+            <button class="mdui-btn mdui-btn-raised mdui-color-theme-accent mdui-btn-next" onclick="nextSlide()">
+                查看总结 <i class="mdui-icon material-icons">arrow_forward</i>
+            </button>
+        </div>
+    </div>
+
+    <!-- 幻灯片 5: 组内分工页 (原 slide-4，内容已修改为示例) -->
+    <div id="slide-5-team" class="slide">
+        <div class="content-wrapper">
+            <!-- 主标题和副标题 -->
+            <div class="mdui-m-t-5">
+                <h1 class="display-large mdui-text-color-theme-primary">项目组内分工 (示例)</h1>
+                <p class="headline-medium mdui-m-t-2">致谢所有参与者</p>
+            </div>
+            
+            <!-- 组内分工列表 (使用较小的字体) -->
+            <div class="mdui-m-t-5 mdui-row">
+                <div class="mdui-col-xs-12 mdui-col-sm-6 mdui-col-md-4">
+                    <p class="title-small mdui-text-color-theme-accent">**总策划**</p>
+                    <p class="body-small">示例成员 A</p>
+                </div>
+                <div class="mdui-col-xs-12 mdui-col-sm-6 mdui-col-md-4">
+                    <p class="title-small mdui-text-color-theme-accent">**记者/采访**</p>
+                    <p class="body-small">示例成员 B，示例成员 C</p>
+                </div>
+                <div class="mdui-col-xs-12 mdui-col-sm-6 mdui-col-md-4">
+                    <p class="title-small mdui-text-color-theme-accent">**视频制作/剪辑**</p>
+                    <p class="body-small">示例成员 D</p>
+                </div>
+                <div class="mdui-col-xs-12 mdui-col-sm-6 mdui-col-md-4 mdui-m-t-3">
+                    <p class="title-small mdui-text-color-theme-accent">**网页设计/开发**</p>
+                    <p class="body-small">示例成员 E (MDUI/MD3 实现)</p>
+                </div>
+                <div class="mdui-col-xs-12 mdui-col-sm-6 mdui-col-md-4 mdui-m-t-3">
+                    <p class="title-small mdui-text-color-theme-accent">**文案/校对**</p>
+                    <p class="body-small">示例成员 F</p>
+                </div>
+            </div>
+
+            
+            <!-- 最右侧的一些小文字 (报告信息) -->
+            <div class="footer-info">
+                <!-- 左侧（可选：留空或放置其他信息） -->
+                <div>
+                    <span class="title-small">本报道由项目组联合制作 (示例)。</span>
+                </div>
+                <!-- 右侧：小文字 -->
+                <div>
+                    <p class="body-small mdui-text-right mdui-m-b-0">
+                        文档版本：v1.2 (修改版)<br>
+                        发布日期：2025年9月<br>
+                        版权所有 © 深度报道组 (示例)
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MDUI JS CDN -->
+    <script src="https://unpkg.com/mdui@1.0.2/dist/js/mdui.min.js"></script>
+    <script>
+        const slides = document.querySelectorAll('.slide');
+        let currentSlideIndex = 0;
+
+        /**
+         * 切换到指定的幻灯片
+         * @param {number} index - 幻灯片的索引 (0-based)
+         */
+        function goToSlide(index) {
+            if (index < 0 || index >= slides.length) {
+                console.warn("Slide index out of bounds.");
+                return;
+            }
+
+            // 隐藏所有幻灯片
+            slides.forEach(slide => {
+                slide.style.display = 'none';
+                slide.style.opacity = '0';
+            });
+
+            // 显示目标幻灯片
+            const targetSlide = slides[index];
+            targetSlide.style.display = 'flex'; // 使用 flex 布局
+            // 使用 setTimeout 确保 display: flex 生效后再应用 opacity 动画
+            setTimeout(() => {
+                targetSlide.style.opacity = '1';
+            }, 10); 
+
+            currentSlideIndex = index;
+        }
+
+        /**
+         * 切换到下一页幻灯片
+         */
+        function nextSlide() {
+            if (currentSlideIndex < slides.length - 1) {
+                goToSlide(currentSlideIndex + 1);
+            } else {
+                // 最后一页，可以循环或提示
+                mdui.snackbar({
+                    message: '已到达报告末尾',
+                    timeout: 2000
+                });
+            }
+        }
+
+        /**
+         * 切换视频全屏模式
+         */
+        function toggleFullScreen() {
+            const iframe = document.getElementById('interview-video');
+            if (iframe) {
+                // 尝试使用标准的 requestFullscreen
+                if (iframe.requestFullscreen) {
+                    iframe.requestFullscreen();
+                } else if (iframe.mozRequestFullScreen) { /* Firefox */
+                    iframe.mozRequestFullScreen();
+                } else if (iframe.webkitRequestFullscreen) { /* Chrome, Safari and Opera */
+                    iframe.webkitRequestFullscreen();
+                } else if (iframe.msRequestFullscreen) { /* IE/Edge */
+                    iframe.msRequestFullscreen();
+                } else {
+                    mdui.snackbar({
+                        message: '浏览器不支持全屏API，请尝试点击视频播放器自带的全屏按钮',
+                        timeout: 3000
+                    });
+                }
+            }
+        }
+
+        // 初始化：显示第一页
+        document.addEventListener('DOMContentLoaded', () => {
+            goToSlide(0);
+        });
+    </script>
+</body>
+</html>
