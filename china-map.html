@@ -1,0 +1,468 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>中国行政区划答题 (MDUI)</title>
+    <!-- 引入 MDUI CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/mdui@1.0.2/dist/css/mdui.min.css"/>
+    <style>
+        /* Custom Styles to enhance MDUI components and fix drawer layout */
+        body {
+            background-color: #f5f5f5; /* MDUI background color */
+        }
+
+        .main-content {
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: calc(100vh - 64px); /* Adjust for app bar height */
+        }
+
+        .quiz-card {
+            width: 100%;
+            max-width: 600px;
+            margin-top: 20px;
+            padding: 24px;
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+            min-height: 400px;
+        }
+
+        .question-text {
+            font-size: 1.4rem;
+            font-weight: 500;
+            margin-bottom: 20px;
+            text-align: center;
+            color: var(--mdui-color-primary);
+        }
+
+        .options-group {
+            margin-bottom: 20px;
+        }
+
+        .options-group h3 {
+            font-size: 1.1rem;
+            color: rgba(0, 0, 0, 0.87);
+            margin-top: 15px;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+        }
+
+        /* Styling the option buttons */
+        .option-button {
+            display: block;
+            width: 100%;
+            margin-bottom: 8px;
+            text-align: left;
+            border: 1px solid rgba(0, 0, 0, 0.12);
+            border-radius: 8px;
+            transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+        }
+        
+        .option-button.selected {
+            background-color: var(--mdui-color-primary);
+            color: #fff;
+            border-color: var(--mdui-color-primary);
+        }
+
+        .option-button.correct {
+            background-color: #4CAF50 !important; /* Green */
+            color: #fff !important;
+            border-color: #4CAF50 !important;
+        }
+
+        .option-button.incorrect {
+            background-color: #F44336 !important; /* Red */
+            color: #fff !important;
+            border-color: #F44336 !important;
+        }
+
+        /* Score Display in App Bar */
+        #current-score {
+            font-size: 1rem;
+            font-weight: 500;
+            margin-left: auto;
+            padding-right: 8px;
+        }
+        
+        /* --- DRAWER LAYOUT FIX --- */
+        .mdui-drawer {
+            /* Ensure the drawer uses flexbox for vertical layout */
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            width: 80%;
+            max-width: 400px;
+        }
+        
+        .search-container {
+            /* Ensure search container padding is consistent */
+            padding: 16px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+            flex-shrink: 0; /* Prevent search area from shrinking */
+        }
+        
+        .info-list-container {
+            /* Allow the list to take up all remaining vertical space */
+            flex-grow: 1;
+            overflow-y: auto; /* Enable scrolling only for the list content */
+            padding: 0 16px;
+        }
+        
+        .info-item {
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+        }
+        
+        .info-item strong {
+            font-weight: 500;
+            color: var(--mdui-color-primary);
+        }
+
+        @media (max-width: 600px) {
+            .mdui-drawer {
+                width: 100%;
+                max-width: none;
+            }
+        }
+    </style>
+</head>
+<body class="mdui-theme-primary-indigo mdui-theme-accent-pink">
+
+    <!-- 引入 MDUI JavaScript -->
+    <script src="https://unpkg.com/mdui@1.0.2/dist/js/mdui.min.js"></script>
+
+    <!-- App Bar (Header) -->
+    <header class="mdui-appbar mdui-shadow-2">
+        <div class="mdui-toolbar mdui-color-theme">
+            <!-- Menu Button to open Drawer -->
+            <button class="mdui-btn mdui-btn-icon" mdui-drawer="{target: '#info-drawer', swipe: true}" onclick="initDrawerData()">
+                <i class="mdui-icon material-icons">menu</i>
+            </button>
+            <a href="javascript:;" class="mdui-typo-headline mdui-text-color-white">行政区划答题</a>
+            <div id="current-score" class="mdui-text-color-white">得分: 0/0</div>
+        </div>
+    </header>
+
+
+        
+        <!-- Search Field Container -->
+        <div class="search-container">
+            <div class="mdui-textfield mdui-textfield-full mdui-m-b-0">
+                <i class="mdui-icon material-icons">search</i>
+                <input class="mdui-textfield-input" type="text" id="search-input" placeholder="搜索名称、简称或行政中心..." onkeyup="filterInfo()"/>
+            </div>
+        </div>
+        
+        <!-- Scrollable List Container -->
+        <div class="info-list-container" id="info-list">
+            <!-- Data list will be injected here -->
+        </div>
+    
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+        <div class="mdui-card quiz-card mdui-shadow-4" id="quiz-container">
+            <!-- Quiz content will be injected here -->
+        </div>
+    </main>
+
+    <script>
+        // --- DATA ---
+        const provinces = [
+            { name: "北京市", abbr: "京", center: "北京" },
+            { name: "天津市", abbr: "津", center: "天津" },
+            { name: "河北省", abbr: "冀", center: "石家庄" },
+            { name: "山西省", abbr: "晋", center: "太原" },
+            { name: "内蒙古自治区", abbr: "内蒙古", center: "呼和浩特" },
+            { name: "辽宁省", abbr: "辽", center: "沈阳" },
+            { name: "吉林省", abbr: "吉", center: "长春" },
+            { name: "黑龙江省", abbr: "黑", center: "哈尔滨" },
+            { name: "上海市", abbr: "沪", center: "上海" },
+            { name: "江苏省", abbr: "苏", center: "南京" },
+            { name: "浙江省", abbr: "浙", center: "杭州" },
+            { name: "安徽省", abbr: "皖", center: "合肥" },
+            { name: "福建省", abbr: "闽", center: "福州" },
+            { name: "江西省", abbr: "赣", center: "南昌" },
+            { name: "山东省", abbr: "鲁", center: "济南" },
+            { name: "河南省", abbr: "豫", center: "郑州" },
+            { name: "湖北省", abbr: "鄂", center: "武汉" },
+            { name: "湖南省", abbr: "湘", center: "长沙" },
+            { name: "广东省", abbr: "粤", center: "广州" },
+            { name: "广西壮族自治区", abbr: "桂", center: "南宁" },
+            { name: "海南省", abbr: "琼", center: "海口" },
+            { name: "重庆市", abbr: "渝", center: "重庆" },
+            { name: "四川省", abbr: "川", center: "成都" },
+            { name: "贵州省", abbr: "黔", center: "贵阳" },
+            { name: "云南省", abbr: "云", center: "昆明" },
+            { name: "西藏自治区", abbr: "藏", center: "拉萨" },
+            { name: "陕西省", abbr: "陕", center: "西安" },
+            { name: "甘肃省", abbr: "甘", center: "兰州" },
+            { name: "青海省", abbr: "青", center: "西宁" },
+            { name: "宁夏回族自治区", abbr: "宁", center: "银川" },
+            { name: "新疆维吾尔自治区", abbr: "新", center: "乌鲁木齐" },
+            { name: "台湾省", abbr: "台", center: "台北" },
+            { name: "香港特别行政区", abbr: "港", center: "香港" },
+            { name: "澳门特别行政区", abbr: "澳", center: "澳门" }
+        ];
+
+        // --- STATE ---
+        let shuffledProvinces = [];
+        let currentQuestion = null;
+        let currentQuestionIndex = 0;
+        let totalQuestionsAnswered = 0;
+        let correctAnswersCount = 0;
+        let userSelection = { abbr: null, center: null };
+        let quizActive = false;
+
+        // --- UTILITY FUNCTIONS ---
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function getOptions(correctValue, field, count) {
+            const allValues = provinces.map(p => p[field]);
+            let distractors = allValues.filter(v => v !== correctValue);
+            distractors = shuffleArray([...new Set(distractors)]);
+            const selectedDistractors = distractors.slice(0, count - 1);
+            let options = [correctValue, ...selectedDistractors];
+            return shuffleArray(options);
+        }
+
+        // --- QUIZ LOGIC ---
+
+        function initializeQuiz() {
+            shuffledProvinces = shuffleArray([...provinces]);
+            currentQuestionIndex = 0;
+            totalQuestionsAnswered = 0;
+            correctAnswersCount = 0;
+            quizActive = true;
+            updateScoreDisplay();
+            generateQuestion();
+        }
+
+        function updateScoreDisplay() {
+            document.getElementById('current-score').textContent = `得分: ${correctAnswersCount}/${totalQuestionsAnswered}`;
+        }
+
+        function generateQuestion() {
+            const container = document.getElementById('quiz-container');
+            
+            if (currentQuestionIndex >= shuffledProvinces.length) {
+                showResults();
+                return;
+            }
+
+            // Smooth transition out
+            container.style.opacity = '0';
+            container.style.transform = 'translateY(10px)';
+
+            setTimeout(() => {
+                currentQuestion = shuffledProvinces[currentQuestionIndex];
+                userSelection = { abbr: null, center: null };
+
+                const abbrOptions = getOptions(currentQuestion.abbr, 'abbr', 4);
+                const centerOptions = getOptions(currentQuestion.center, 'center', 4);
+                
+                let html = `
+                    <div id="current-q">
+                        <p class="question-text mdui-text-color-theme">请回答：${currentQuestion.name} 的简称和行政中心是什么？</p>
+
+                        <!-- Abbreviation Options -->
+                        <div class="options-group">
+                            <h3>1. 选择简称 (Abbreviation)</h3>
+                            <div id="abbr-options">
+                                ${abbrOptions.map(opt => 
+                                    `<button class="mdui-btn mdui-ripple option-button" data-type="abbr" data-value="${opt}" onclick="selectOption(this, 'abbr')">${opt}</button>`
+                                ).join('')}
+                            </div>
+                        </div>
+
+                        <!-- Center Options -->
+                        <div class="options-group">
+                            <h3>2. 选择行政中心 (Administrative Center)</h3>
+                            <div id="center-options">
+                                ${centerOptions.map(opt => 
+                                    `<button class="mdui-btn mdui-ripple option-button" data-type="center" data-value="${opt}" onclick="selectOption(this, 'center')">${opt}</button>`
+                                ).join('')}
+                            </div>
+                        </div>
+
+                        <button class="mdui-btn mdui-btn-raised mdui-ripple mdui-color-theme mdui-center" id="submit-btn" onclick="checkAnswer()" disabled style="width: 100%; margin-top: 20px;">
+                            提交答案
+                        </button>
+                    </div>
+                `;
+                container.innerHTML = html;
+                
+                // Smooth transition in
+                container.style.opacity = '1';
+                container.style.transform = 'translateY(0)';
+            }, 300); 
+        }
+
+        function selectOption(button, type) {
+            const value = button.getAttribute('data-value');
+            userSelection[type] = value;
+
+            // Deselect all others in the group
+            const parentId = type === 'abbr' ? 'abbr-options' : 'center-options';
+            document.querySelectorAll(`#${parentId} .option-button`).forEach(btn => {
+                btn.classList.remove('selected');
+            });
+
+            // Select current button
+            button.classList.add('selected');
+
+            // Check if both selections are made to enable submit button
+            const submitBtn = document.getElementById('submit-btn');
+            if (userSelection.abbr && userSelection.center) {
+                submitBtn.disabled = false;
+                // MDUI doesn't automatically handle disabled color changes on raised buttons, so we manage the class manually for visual feedback
+                submitBtn.classList.remove('mdui-color-disabled');
+                submitBtn.classList.add('mdui-color-theme');
+            }
+        }
+
+        function checkAnswer() {
+            if (!currentQuestion || !userSelection.abbr || !userSelection.center) return;
+
+            totalQuestionsAnswered++;
+            
+            const isAbbrCorrect = userSelection.abbr === currentQuestion.abbr;
+            const isCenterCorrect = userSelection.center === currentQuestion.center;
+            
+            let isQuestionCorrect = false;
+
+            if (isAbbrCorrect && isCenterCorrect) {
+                correctAnswersCount++;
+                isQuestionCorrect = true;
+            }
+
+            // Visually mark results
+            document.querySelectorAll('.option-button').forEach(btn => {
+                const type = btn.getAttribute('data-type');
+                const value = btn.getAttribute('data-value');
+                
+                btn.disabled = true; // Disable further interaction
+                btn.classList.remove('mdui-ripple'); 
+
+                if (type === 'abbr') {
+                    if (value === currentQuestion.abbr) {
+                        btn.classList.add('correct');
+                    } else if (value === userSelection.abbr && !isAbbrCorrect) {
+                        btn.classList.add('incorrect');
+                    }
+                } else if (type === 'center') {
+                    if (value === currentQuestion.center) {
+                        btn.classList.add('correct');
+                    } else if (value === userSelection.center && !isCenterCorrect) {
+                        btn.classList.add('incorrect');
+                    }
+                }
+            });
+
+            // Update submit button to Next Question
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.textContent = isQuestionCorrect ? "回答正确！下一题 >>" : "回答错误。下一题 >>";
+            
+            // Apply MDUI color classes for feedback
+            submitBtn.classList.remove('mdui-color-theme');
+            submitBtn.classList.remove('mdui-color-red');
+            submitBtn.classList.remove('mdui-color-green');
+            
+            submitBtn.classList.add(isQuestionCorrect ? 'mdui-color-green' : 'mdui-color-red');
+            
+            submitBtn.onclick = nextQuestion;
+            submitBtn.disabled = false;
+            
+            updateScoreDisplay();
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            generateQuestion();
+        }
+
+        function showResults() {
+            quizActive = false;
+            const container = document.getElementById('quiz-container');
+            container.style.opacity = '0';
+            container.style.transform = 'translateY(10px)';
+
+            setTimeout(() => {
+                const percentage = (totalQuestionsAnswered === 0) ? 0 : (correctAnswersCount / totalQuestionsAnswered * 100).toFixed(1);
+                container.innerHTML = `
+                    <p class="question-text mdui-text-color-black">答题结束！</p>
+                    <div style="text-align: center; margin-top: 30px;">
+                        <h2 class="mdui-typo-display-1 mdui-text-color-theme">最终得分</h2>
+                        <p style="font-size: 3rem; font-weight: bold;">${correctAnswersCount} / ${totalQuestionsAnswered}</p>
+                        <p class="mdui-typo-subheading">正确率: ${percentage}%</p>
+                        <button class="mdui-btn mdui-btn-raised mdui-ripple mdui-color-theme" onclick="initializeQuiz()" style="width: 100%; margin-top: 30px;">
+                            重新开始
+                        </button>
+                    </div>
+                `;
+                container.style.opacity = '1';
+                container.style.transform = 'translateY(0)';
+            }, 300);
+        }
+
+        // --- INFO DRAWER LOGIC ---
+
+        function renderInfoList(data) {
+            const listContainer = document.getElementById('info-list');
+            if (data.length === 0) {
+                listContainer.innerHTML = '<p class="mdui-p-a-2 mdui-text-center">未找到匹配项。</p>';
+                return;
+            }
+            
+            const html = data.map(p => `
+                <div class="info-item">
+                    <p><strong>名称:</strong> ${p.name}</p>
+                    <p><strong>简称:</strong> ${p.abbr}</p>
+                    <p><strong>行政中心:</strong> ${p.center}</p>
+                </div>
+            `).join('');
+            listContainer.innerHTML = html;
+        }
+
+        // Initialize data when the drawer is opened
+        function initDrawerData() {
+             // Ensure the list is rendered when the drawer is opened
+            renderInfoList(provinces);
+            document.getElementById('search-input').value = '';
+        }
+
+
+        function filterInfo() {
+            const searchTerm = document.getElementById('search-input').value.toLowerCase().trim();
+            
+            if (!searchTerm) {
+                renderInfoList(provinces);
+                return;
+            }
+
+            const filteredData = provinces.filter(p => 
+                p.name.toLowerCase().includes(searchTerm) ||
+                p.abbr.toLowerCase().includes(searchTerm) ||
+                p.center.toLowerCase().includes(searchTerm)
+            );
+            
+            renderInfoList(filteredData);
+        }
+
+        // --- INITIALIZATION ---
+        window.onload = initializeQuiz;
+    </script>
+</body>
+</html>
