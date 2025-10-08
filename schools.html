@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>深度报道：新闻采访报告示例</title>
+    <title>采访报告</title>
     <!-- MDUI CSS CDN -->
     <link rel="stylesheet" href="https://unpkg.com/mdui@1.0.2/dist/css/mdui.min.css"/>
     <style>
@@ -48,9 +48,9 @@
 #slide-3-video .content-wrapper {
     height: 100%;
     display: flex;
-    flex-direction: row; /* 修改为水平排列 */
-    gap: 16px; /* 增加视频和按钮之间的间距 */
-    justify-content: flex-start; /* 从左侧开始排列 */
+    flex-direction: column; /* 更改为垂直排列，以容纳多个视频 */
+    gap: 16px; /* 增加元素之间的间距 */
+    justify-content: flex-start; /* 从顶部开始排列 */
     align-items: flex-start; /* 顶部对齐 */
 }
         #slide-3-video .video-container {
@@ -282,6 +282,30 @@
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share">
     </iframe>
 </div>
+            </div>
+            
+            <!-- 新增：第二个视频的小标题 -->
+            <h2 class="title-small mdui-text-color-theme-accent mdui-m-t-4">补充片段：家长应对策略</h2>
+            
+            <!-- 新增：第二个视频容器 -->
+            <div class="video-container">
+<div class="video-responsive">
+    <!-- 第二个视频嵌入 URL -->
+    <iframe 
+        src="https://player.bilibili.com/player.html?isOutside=true&aid=115338511522668&bvid=BV1PRxvz9Eu2&cid=32922603003&p=1" 
+        title="补充采访片段" 
+        scrolling="no" 
+        border="0" 
+        frameborder="no" 
+        framespacing="0" 
+        allowfullscreen="true"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share">
+    </iframe>
+</div>
+            </div>
+            
+            <!-- 按钮区域：移到右侧居中 -->
+            <div class="control-area">
             </div>
             
             <!-- 按钮区域：移到右侧居中 -->
