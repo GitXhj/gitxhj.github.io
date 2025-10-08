@@ -44,7 +44,6 @@
     animation: subtle-gradient-animation 20s ease infinite; /* 20秒平滑循环动画 */
 }
 
-/* 幻灯片 3 (原 slide-2): 视频布局 - 核心修改区域 */
 #slide-3-video .content-wrapper {
     height: 100%;
     display: flex;
@@ -52,6 +51,7 @@
     gap: 16px; /* 增加元素之间的间距 */
     justify-content: flex-start; /* 从顶部开始排列 */
     align-items: flex-start; /* 顶部对齐 */
+    overflow-y: auto; /* 关键：允许内容在垂直方向上滚动 */
 }
         #slide-3-video .video-container {
             flex-grow: 1;
