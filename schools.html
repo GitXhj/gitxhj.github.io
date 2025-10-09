@@ -282,7 +282,7 @@
     frameborder="no" 
     framespacing="0" 
     allowfullscreen="true"
-    allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-picture; web-share">
+    allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share">
 </iframe>
 </div>
             </div>
@@ -444,11 +444,27 @@ if (index === 2) {
     const iframe = document.getElementById('interview-video');
     const dataSrc = iframe.getAttribute('data-src');
     
+    // --- 视频延迟加载逻辑 ---
+// 视频幻灯片索引是 2 (第三个幻灯片)
+if (index === 2) {
+    const iframe = document.getElementById('interview-video');
+    const dataSrc = iframe.getAttribute('data-src');
+    
     // 检查 data-src 是否存在，并且尚未标记为已加载
     if (dataSrc && !iframe.hasAttribute('data-loaded')) {
+        console.log("Loading video...");
         iframe.src = dataSrc; // 触发加载
-        iframe.setAttribute('data-loaded', 'true'); // 标记为已加载，防止重复设置
+        iframe.setAttribute('data-loaded', 'true'); // 标记为已加载
     }
+}
+
+// 可选：如果离开视频页，可以将 src 重新设置为 about:blank 以释放资源
+if (index !== 2) {
+     const iframe = document.getElementById('interview-video');
+     // 只有当 iframe 已经加载过内容时才重置
+     if (iframe.hasAttribute('data-loaded')) {
+         iframe.src = "about:blank";
+     }
 }
         }
     }
