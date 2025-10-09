@@ -439,6 +439,17 @@ function goToSlide(index) {
         // 检查 data-src 是否存在，并且 src 仍然为空（防止重复加载）
         if (dataSrc && iframe.src === "") {
             iframe.src = dataSrc; // 只有在进入该页时才设置 src，触发加载
+// goToSlide 函数内部
+if (index === 2) {
+    const iframe = document.getElementById('interview-video');
+    const dataSrc = iframe.getAttribute('data-src');
+    
+    // 检查 data-src 是否存在，并且尚未标记为已加载
+    if (dataSrc && !iframe.hasAttribute('data-loaded')) {
+        iframe.src = dataSrc; // 触发加载
+        iframe.setAttribute('data-loaded', 'true'); // 标记为已加载，防止重复设置
+    }
+}
         }
     }
 }
