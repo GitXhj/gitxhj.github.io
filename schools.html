@@ -270,17 +270,19 @@
             <div class="video-container">
 <div class="video-responsive">
     <!-- 视频占位符，请替换为实际的视频嵌入 URL -->
-    <iframe 
-        id="interview-video"
-        src="https://player.bilibili.com/player.html?isOutside=true&aid=115303715641205&bvid=BV1EXHwzGEXM&cid=32791072177&p=1" 
-        title="采访视频片段" 
-        scrolling="no" 
-        border="0" 
-        frameborder="no" 
-        framespacing="0" 
-        allowfullscreen="true"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share">
-    </iframe>
+    <!-- 修改后的代码 -->
+<iframe 
+    id="interview-video"
+    data-src="https://player.bilibili.com/player.html?isOutside=true&aid=115303715641205&bvid=BV1EXHwzGEXM&cid=32791072177&p=1&autoplay=0" 
+    src="" 
+    title="采访视频片段" 
+    scrolling="no" 
+    border="0" 
+    frameborder="no" 
+    framespacing="0" 
+    allowfullscreen="true"
+    allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share">
+</iframe>
 </div>
             </div>
             
@@ -422,32 +424,40 @@
          * 切换到指定的幻灯片
          * @param {number} index - 幻灯片的索引 (0-based)
          */
-        function goToSlide(index) {
-            if (index < 0 || index >= slides.length) {
-                console.warn("Slide index out of bounds.");
-                return;
-            }
+        // 修改后的代码
+function goToSlide(index) {
+    if (index < 0 || index >= slides.length) {
+        console.warn("Slide index out of bounds.");
+        return;
+    }
 
-            // 隐藏所有幻灯片
-            slides.forEach(slide => {
-                slide.style.display = 'none';
-                slide.style.opacity = '0';
-            });
+    // 隐藏所有幻灯片
+    slides.forEach(slide => {
+        slide.style.display = 'none';
+        slide.style.opacity = '0';
+    });
 
-            // 显示目标幻灯片
-            const targetSlide = slides[index];
-            targetSlide.style.display = 'flex'; // 使用 flex 布局
-            // 使用 setTimeout 确保 display: flex 生效后再应用 opacity 动画
-            setTimeout(() => {
-                targetSlide.style.opacity = '1';
-            }, 10); 
+    // 显示目标幻灯片
+    const targetSlide = slides[index];
+    targetSlide.style.display = 'flex'; // 使用 flex 布局
+    // 使用 setTimeout 确保 display: flex 生效后再应用 opacity 动画
+    setTimeout(() => {
+        targetSlide.style.opacity = '1';
+    }, 10); 
 
-            currentSlideIndex = index;
+    currentSlideIndex = index;
+
+    // --- 新增逻辑：视频延迟加载 ---
+    // Slide 3 的索引是 2
+    if (index === 2) {
+        const iframe = document.getElementById('interview-video');
+        const dataSrc = iframe.getAttribute('data-src');
+        // 检查 data-src 是否存在，并且 src 仍然为空（防止重复加载）
+        if (dataSrc && iframe.src === "") {
+            iframe.src = dataSrc; // 只有在进入该页时才设置 src，触发加载
         }
-
-        /**
-         * 切换到下一页幻灯片
-         */
+    }
+}
         function nextSlide() {
             if (currentSlideIndex < slides.length - 1) {
                 goToSlide(currentSlideIndex + 1);
