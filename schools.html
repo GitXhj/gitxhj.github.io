@@ -270,20 +270,19 @@
             <div class="video-container">
 <div class="video-responsive">
     <!-- 视频占位符，请替换为实际的视频嵌入 URL -->
-    <!-- 修改后的代码 -->
-<!-- 推荐修改：使用 about:blank 作为初始 src，确保不加载任何内容 -->
-<iframe 
-    id="interview-video"
-    data-src="https://player.bilibili.com/player.html?isOutside=true&aid=115303715641205&bvid=BV1EXHwzGEXM&cid=32791072177&p=1&autoplay=0" 
-    src="about:blank" 
-    title="采访视频片段" 
-    scrolling="no" 
-    border="0" 
-    frameborder="no" 
-    framespacing="0" 
-    allowfullscreen="true"
-    allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share">
-</iframe>
+    <!-- 确保 iframe 初始 src 为 about:blank，并使用 data-src 存储实际地址 -->
+    <iframe 
+        id="interview-video"
+        data-src="https://player.bilibili.com/player.html?isOutside=true&aid=115303715641205&bvid=BV1EXHwzGEXM&cid=32791072177&p=1&autoplay=0" 
+        src="about:blank" 
+        title="采访视频片段" 
+        scrolling="no" 
+        border="0" 
+        frameborder="no" 
+        framespacing="0" 
+        allowfullscreen="true"
+        allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-picture; web-share">
+    </iframe>
 </div>
             </div>
             
@@ -301,7 +300,7 @@
                     <button class="mdui-btn mdui-btn-icon mdui-color-theme-accent mdui-m-b-2" onclick="toggleFullScreen()">
                         <i class="mdui-icon material-icons">fullscreen</i>
                     </button>
-                    <!-- 下一页按钮 -->
+                       <!-- 下一页按钮 -->
                     <button class="mdui-btn mdui-btn-raised mdui-color-theme-accent mdui-btn-next" onclick="nextSlide()">
                         继续 <i class="mdui-icon material-icons">arrow_forward</i>
                     </button>
@@ -408,7 +407,6 @@
          * 切换到指定的幻灯片
          * @param {number} index - 幻灯片的索引 (0-based)
          */
-        // 修改后的代码
 function goToSlide(index) {
     if (index < 0 || index >= slides.length) {
         console.warn("Slide index out of bounds.");
@@ -431,44 +429,19 @@ function goToSlide(index) {
 
     currentSlideIndex = index;
 
-    // --- 新增逻辑：视频延迟加载 ---
-    // Slide 3 的索引是 2
+    // 视频延迟加载逻辑 (Slide Index 2)
     if (index === 2) {
         const iframe = document.getElementById('interview-video');
         const dataSrc = iframe.getAttribute('data-src');
-        // 检查 data-src 是否存在，并且 src 仍然为空（防止重复加载）
-        if (dataSrc && iframe.src === "") {
-            iframe.src = dataSrc; // 只有在进入该页时才设置 src，触发加载
-// goToSlide 函数内部
-if (index === 2) {
-    const iframe = document.getElementById('interview-video');
-    const dataSrc = iframe.getAttribute('data-src');
-    
-    // --- 视频延迟加载逻辑 ---
-// 视频幻灯片索引是 2 (第三个幻灯片)
-if (index === 2) {
-    const iframe = document.getElementById('interview-video');
-    const dataSrc = iframe.getAttribute('data-src');
-    
-    // 检查 data-src 是否存在，并且尚未标记为已加载
-    if (dataSrc && !iframe.hasAttribute('data-loaded')) {
-        console.log("Loading video...");
-        iframe.src = dataSrc; // 触发加载
-        iframe.setAttribute('data-loaded', 'true'); // 标记为已加载
-    }
-}
-
-// 可选：如果离开视频页，可以将 src 重新设置为 about:blank 以释放资源
-if (index !== 2) {
-     const iframe = document.getElementById('interview-video');
-     // 只有当 iframe 已经加载过内容时才重置
-     if (iframe.hasAttribute('data-loaded')) {
-         iframe.src = "about:blank";
-     }
-}
+        
+        // 检查 data-src 是否存在，并且尚未标记为已加载
+        if (dataSrc && !iframe.hasAttribute('data-loaded')) {
+            iframe.src = dataSrc; // 触发加载
+            iframe.setAttribute('data-loaded', 'true'); // 标记为已加载，防止重复设置
         }
     }
 }
+
         function nextSlide() {
             if (currentSlideIndex < slides.length - 1) {
                 goToSlide(currentSlideIndex + 1);
