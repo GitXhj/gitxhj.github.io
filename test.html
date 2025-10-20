@@ -1,3 +1,80 @@
-https://www.123865.com/s/O9fhjv-Co4Jh?notoken=1
-<p>
-三方：http://m.jxdown.com/app/105395.html
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redirecting</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding-top: 50px;
+        }
+        .content-container {
+            max-width: 600px;
+            margin: 0 auto;
+            border: 1px solid #ccc;
+            padding: 20px;
+            border-radius: 8px;
+            display: none; /* 默认隐藏，直到JS确认不重定向才显示 */
+        }
+    </style>
+    <script>
+        // ---------------------------------------------------
+        // 1. 配置区域
+        // ---------------------------------------------------
+
+        // **【重要】** 替换为您要重定向的目标 URL
+       const redirectURL = "https://m.bilibili.com/video/BV1VtGZzYEq6";
+
+        // 设定截止时间：2025年10月20日 22:00:00
+        // T 后的时间是小时:分钟:秒。此时间将根据用户的本地时区进行解释。
+        const cutoffDate = new Date("2025-10-20T22:00:00");
+
+        // ---------------------------------------------------
+        // 2. 逻辑处理
+        // ---------------------------------------------------
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const contentContainer = document.getElementById('main-content');
+
+            if (now <= cutoffDate) {
+                // 当前时间在截止时间之前或等于截止时间，执行重定向
+                console.log(`当前时间 (${now.toLocaleString()}) 尚未超过截止时间 (${cutoffDate.toLocaleString()})，正在重定向到: ${redirectURL}`);
+                
+                // 使用 replace() 而不是 assign() 可以防止用户点击后退按钮回到此页面
+                window.location.replace(redirectURL);
+                
+                // 提示用户正在重定向，以防JS执行缓慢
+                document.body.innerHTML = '<h1>正在跳转...</h1><p>如果浏览器没有自动跳转，请检查您的网络连接或浏览器设置。</p>';
+
+            } else {
+                // 当前时间已超过截止时间，显示页面内容
+                console.log(`当前时间 (${now.toLocaleString()}) 已超过截止时间，显示页面内容。`);
+                contentContainer.style.display = 'block';
+            }
+        });
+    </script>
+</head>
+<body>
+
+    <!-- 
+        当时间超过 2025-10-20 22:00:00 后，此区域的内容才会显示 
+    -->
+    <div id="main-content" class="content-container">
+        
+        <p>Timeout
+        
+        <!-- 您可以在这里放置您的正常页面内容 -->
+        <hr>
+        <p>当前页面 URL：<span id="current-url"></span></p>
+    </div>
+
+    <script>
+        // 辅助脚本：显示当前页面的URL
+        document.getElementById('current-url').textContent = window.location.href;
+    </script>
+
+</body>
+</html>
