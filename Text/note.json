@@ -1,3 +1,11 @@
-{"notes": [{"id": 1,"title": "关于 Liquid Glass 设计的思考","content": "今天尝试了 Liquid Glass 设计风格，半透明的玻璃态界面配合模糊效果，让整个页面更具层次感和现代感。这种设计不仅美观，还能很好地融入背景图片。","imageUrl": "
-https://example.com/note1.jpg",
-"date": "2025-12-20"},{"id": 2,"title": "学习 React Hooks 心得","content": "React Hooks 真的改变了我写组件的方式，useState 和 useEffect 的组合让状态管理变得优雅很多。","imageUrl": "","date": "2025-12-18"}]}
+{
+  "notes": [
+    {
+      "id": 1,
+      "title": "新网站上线！",
+      "content": "留言看看",
+      "image": "",
+      "date": "2025-12-24"
+    }
+  ]
+}
