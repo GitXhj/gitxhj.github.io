@@ -1,1 +1,2 @@
-Visits ![Counter](https://counter.jerryz.com.cn/counter?name=gitxhj)
+Visits
+![Counter](https://counter.jerryz.com.cn/counter?name=counter&font=200)
