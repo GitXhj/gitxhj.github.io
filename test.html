@@ -1,1 +1,45 @@
 https://pixso.cn/app/design/4DnkIEOHpyB1gWMF6XAvcQ?icon_type=1&page-id=0%3A1 邀请您加入 Pixso 设计文件「黑鸟APP3.0 - Partial file saved 2026-2-1」
+
+# Role
+You are a Senior Flutter UI/UX Engineer. Your goal is to convert the attached UI screenshot into **production-ready, high-fidelity Flutter code**.
+
+# Input Context
+I have attached a screenshot of a mobile app UI (Social/Lifestyle/E-commerce category).
+Please analyze the visual hierarchy, layout patterns, and styling details deeply before coding.
+
+# Core Requirements (Production Standards)
+1.  **Architecture**:
+    -   Use `CustomScrollView` with `Slivers` (e.g., `SliverAppBar`, `SliverList`, `SliverGrid`) as the root structure. This is mandatory for performance and scroll effects.
+    -   Do NOT use nested `ListViews` inside `SingleChildScrollView`.
+    -   Break down the UI into small, reusable `StatelessWidget` components (e.g., `UserAvatar`, `PostCard`, `ActionButtons`).
+
+2.  **Material Design & Native Motion (CRITICAL)**:
+    -   **Ripple Effects**: Do NOT use `GestureDetector` for tap targets. Instead, use `InkWell` wrapped in a `Material` (transparent) or `Ink` widget to ensure the native Android ripple/splash effect is visible on interaction.
+    -   **Scroll Physics**: Use `BouncingScrollPhysics` to mimic the premium iOS/Social app feel.
+    -   **Hero Animations**: Wrap main images (avatars, product images) in `Hero` widgets with unique tags to prepare for navigation transitions.
+    -   **Feedback**: Add subtle visual feedback (e.g., slight opacity change or scale) for buttons if InkWell isn't sufficient.
+
+3.  **Styling & Assets**:
+    -   **Colors**: Extract the exact color palette (primary, background, text colors) from the image. Use `Color(0xFF...)`.
+    -   **Images**: Use `https://picsum.photos/` or `https://i.pravatar.cc/` for placeholders.
+    -   **Typography**: Use `GoogleFonts` (if applicable) or standard text styles. Pay close attention to font weights (Bold vs w500) and line heights.
+    -   **Icons**: Use `Lucide Icons` or `Remix Icons` (via packages) if Material Icons don't match the style; otherwise, stick to Material Icons.
+
+4.  **Dependencies**:
+    -   Use `cached_network_image` for image handling.
+    -   Use `flutter_staggered_grid_view` if the layout is a masonry/waterfall grid.
+    -   Use `carousel_slider` if there is a banner section.
+    -   Use `flutter_screenutil` logic (optional, but keep layout flexible).
+
+# Code Output Structure
+-   Provide a **single file** (`main.dart`) that is copy-paste runnable.
+-   Create a `MockData` class or list to simulate real API data.
+-   Comment on complex sections explaining *why* a specific widget (like `SliverPersistentHeader`) was chosen.
+-   Ensure **Null Safety** is strictly followed.
+
+# Visual Analysis Task (Execute this implicitly)
+1.  Identify the **Header/Navigation** pattern (Transparent AppBar? Search bar pinned?).
+2.  Identify the **List Type** (Feed? Grid? Horizontal scroll section?).
+3.  Identify **Micro-interactions** (Like buttons, Tabs, Chips).
+
+Please generate the code now.
