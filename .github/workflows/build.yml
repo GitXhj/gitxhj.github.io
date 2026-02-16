@@ -1,0 +1,33 @@
+name: Build Posts
+
+on:
+  push:
+    paths:
+      - "posts/*.md"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install marked gray-matter fs-extra
+
+      - name: Build HTML
+        run: node build.js
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add posts-html posts.json
+          git commit -m "auto: build html and index" || echo "No changes"
+          git push
