@@ -6,6 +6,7 @@ const { marked } = require("marked");
 const POSTS_DIR = "posts";
 const OUTPUT_DIR = "posts-html";
 const INDEX_FILE = "posts.json";
+const TEMPLATE_PATH = "templates/post.html";
 
 async function build() {
   await fs.ensureDir(OUTPUT_DIR);
@@ -13,35 +14,31 @@ async function build() {
   const files = await fs.readdir(POSTS_DIR);
   const index = [];
 
+  // ✅ 只读取一次模板（不要放循环里）
+  const template = await fs.readFile(TEMPLATE_PATH, "utf-8");
+
   for (const file of files) {
     if (!file.endsWith(".md")) continue;
 
     const filePath = path.join(POSTS_DIR, file);
-    const content = await fs.readFile(filePath, "utf-8");
+    const raw = await fs.readFile(filePath, "utf-8");
 
-    const { data, content: markdown } = matter(content);
+    // ✅ 解析 frontmatter
+    const { data, content } = matter(raw);
 
-    const htmlContent = marked.parse(markdown);
+    // ✅ markdown → html
+    const htmlContent = marked.parse(content);
 
-    const htmlTemplate = `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8" />
-  <title>${data.title}</title>
-</head>
-<body>
-  <h1>${data.title}</h1>
-  <p>${data.date}</p>
-  <div>${htmlContent}</div>
-</body>
-</html>
-`;
+    // ✅ 替换模板变量
+    const finalHtml = template
+      .replace(/{{title}}/g, data.title || "")
+      .replace(/{{date}}/g, data.date || "")
+      .replace(/{{content}}/g, htmlContent);
 
     const htmlFileName = file.replace(".md", ".html");
     const outputPath = path.join(OUTPUT_DIR, htmlFileName);
 
-    await fs.writeFile(outputPath, htmlTemplate);
+    await fs.writeFile(outputPath, finalHtml);
 
     index.push({
       title: data.title,
@@ -50,7 +47,7 @@ async function build() {
     });
   }
 
-  // 按时间倒序
+  // ✅ 按时间倒序
   index.sort((a, b) => new Date(b.date) - new Date(a.date));
 
   await fs.writeFile(INDEX_FILE, JSON.stringify(index, null, 2));
