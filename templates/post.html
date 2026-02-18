@@ -185,7 +185,7 @@
 const el = document.getElementById('post-date');
 const rawDate = el.dataset.date;
 
-const postDate = new Date(rawDate + '+08:00');
+const postDate = new Date(rawDate);
 
 // 转为上海时间
 const formatter = new Intl.DateTimeFormat('zh-CN', {
