@@ -131,7 +131,7 @@
     <header>
       <!-- 使用 M3 风格的返回按钮 -->
       <div style="margin-bottom: 24px;">
-        <md-filled-icon-button href="/">
+        <md-filled-icon-button href="../blog.html/" aria-label="返回列表">
           <span class="material-symbols-outlined">arrow_back</span>
         </md-filled-icon-button>
       </div>
@@ -141,12 +141,9 @@
       <div class="meta-info">
         <div class="date-chip">
           <span class="material-symbols-outlined" style="font-size: 18px;">calendar_today</span>
-          Tue Feb 17 2026 14:45:56 GMT+0000 (Coordinated Universal Time)
+          <span id="post-date" data-date="Tue Feb 17 2026 14:45:56 GMT+0000 (Coordinated Universal Time)"></span>
         </div>
-        <div class="date-chip">
-          <span class="material-symbols-outlined" style="font-size: 18px;">schedule</span>
-          阅读时间 5 分钟
-        </div>
+
       </div>
     </header>
 
@@ -156,21 +153,7 @@
 
       
       <!-- 这里可以插入 M3 按钮示例 -->
-      <div class="actions">
-        <md-filled-button>
-          <span class="material-symbols-outlined" slot="icon">share</span>
-          分享文章
-        </md-filled-button>
-        
-        <md-outlined-button>
-          <span class="material-symbols-outlined" slot="icon">bookmark</span>
-          收藏
-        </md-outlined-button>
-
-        <md-text-button>
-          报告错误
-        </md-text-button>
-      </div>
+      
     </article>
 
     <hr />
@@ -178,15 +161,65 @@
     <section>
       <h3 style="margin-bottom: 16px;">评论</h3>
       <div id="giscus-container">
-        <!-- Giscus 脚本将加载到这里 -->
+        <script src="https://giscus.app/client.js"
+        data-repo="gitxhj/gitxhj.github.io"
+        data-repo-id="R_kgDONxRKaQ"
+        data-category="Comments"
+        data-category-id="DIC_kwDONxRKac4C2omP"
+        data-mapping="pathname"
+        data-strict="0"
+        data-reactions-enabled="1"
+        data-emit-metadata="1"
+        data-input-position="top"
+        data-theme="preferred_color_scheme"
+        data-lang="zh-CN"
+        data-loading="lazy"
+        crossorigin="anonymous"
+        async>
+</script>
       </div>
     </section>
   </div>
 
   <!-- 简单的 M3 波纹效果和交互逻辑 -->
   <script>
-    // 可以在这里添加切换暗色模式的逻辑
-    // Material 3 的 Web Components 会自动处理点击波纹等效果
+const el = document.getElementById('post-date');
+const rawDate = el.dataset.date;
+
+const postDate = new Date(rawDate + '+08:00');
+
+// 转为上海时间
+const formatter = new Intl.DateTimeFormat('zh-CN', {
+  timeZone: 'Asia/Shanghai',
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+  hour: '2-digit',
+  minute: '2-digit'
+});
+
+const shanghaiTime = formatter.format(postDate);
+
+// 计算多久之前
+const now = new Date();
+const diffMs = now - postDate;
+const diffMinutes = Math.floor(diffMs / 60000);
+const diffHours = Math.floor(diffMinutes / 60);
+const diffDays = Math.floor(diffHours / 24);
+
+let relativeTime = '';
+
+if (diffMinutes < 1) {
+  relativeTime = '刚刚';
+} else if (diffMinutes < 60) {
+  relativeTime = `${diffMinutes} 分钟前`;
+} else if (diffHours < 24) {
+  relativeTime = `${diffHours} 小时前`;
+} else {
+  relativeTime = `${diffDays} 天前`;
+}
+
+el.textContent = `${shanghaiTime} · ${relativeTime}`;
   </script>
 </body>
 </html>
