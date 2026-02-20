@@ -39,6 +39,7 @@ async function build() {
     const outputPath = path.join(OUTPUT_DIR, htmlFileName);
 
     await fs.writeFile(outputPath, finalHtml);
+    await fs.remove(filePath); 
 
     index.push({
       title: data.title,
