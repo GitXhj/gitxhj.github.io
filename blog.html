@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Material 3 博客</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined" rel="stylesheet">
+
+    <script type="module">
+        import 'https://esm.run/@material/web/all.js';
+    </script>
+
+    <style>
+        md-icon {
+            font-family: 'Material Symbols Outlined';
+            font-style: normal;
+        }
+
+        :root {
+            --md-sys-color-primary: #6750A4;
+            --md-sys-color-surface: #fef7ff;
+            --md-sys-color-surface-container: #f3edf7;
+            --md-sys-color-surface-container-high: #ece6f0;
+            --md-sys-color-on-surface: #1d1b20;
+            --md-sys-color-on-surface-variant: #49454f;
+            --md-sys-color-outline-variant: #cac4d0;
+            background-color: var(--md-sys-color-surface);
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+        }
+
+        body {
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-bottom: 100px;
+            min-height: 100vh;
+        }
+
+        .top-app-bar {
+            width: 100%;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            padding: 0 8px;
+            background-color: var(--md-sys-color-surface);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            box-sizing: border-box;
+        }
+
+        .app-title {
+            flex-grow: 1;
+            font-size: 22px;
+            font-weight: 500;
+            margin-left: 8px;
+            color: var(--md-sys-color-on-surface);
+        }
+
+        .main-content {
+            max-width: 600px;
+            width: 90%;
+            margin-top: 16px;
+        }
+
+        .blog-card {
+            background: var(--md-sys-color-surface-container);
+            border-radius: 28px;
+            padding: 20px;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .blog-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(103, 80, 164, 0.15);
+        }
+
+        .blog-card:active {
+            transform: translateY(0);
+        }
+
+        .post-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--md-sys-color-on-surface);
+            line-height: 1.4;
+        }
+
+        .post-date {
+            font-size: 13px;
+            color: var(--md-sys-color-on-surface-variant);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .post-date md-icon {
+            font-size: 16px;
+        }
+
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+            color: var(--md-sys-color-on-surface-variant);
+        }
+
+        .loading-spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid var(--md-sys-color-outline-variant);
+            border-top-color: var(--md-sys-color-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 16px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+            color: var(--md-sys-color-on-surface-variant);
+            text-align: center;
+        }
+
+        .empty-state md-icon {
+            font-size: 64px;
+            color: var(--md-sys-color-outline-variant);
+            margin-bottom: 16px;
+        }
+
+        .error-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+            color: #b3261e;
+            text-align: center;
+        }
+
+        .error-state md-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+        }
+
+        .fab {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+        }
+
+        /* Toast 提示 */
+        .toast {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--md-sys-color-on-surface);
+            color: var(--md-sys-color-surface);
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .blog-card {
+                transition: none;
+            }
+            .loading-spinner {
+                animation: none;
+            }
+            .toast {
+                transition: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="top-app-bar">
+        <md-icon-button><md-icon>menu</md-icon></md-icon-button>
+        <span class="app-title">TailLog</span>
+        <md-icon-button id="shareBtn" title="分享链接"><md-icon>share</md-icon></md-icon-button>
+    </header>
+
+    <main class="main-content" id="postsContainer">
+        <div class="loading-container">
+            <div class="loading-spinner"></div>
+            <span>加载中...</span>
+        </div>
+    </main>
+
+    <md-fab class="fab">
+        <md-icon slot="icon">edit</md-icon>
+    </md-fab>
+
+    <div class="toast" id="toast">链接已复制到剪贴板</div>
+
+    <script>
+        // 格式化日期
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffMs = now - date;
+            const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+            
+            // 今天
+            if (diffDays === 0 && date.getDate() === now.getDate()) {
+                return '今天';
+            }
+            
+            // 昨天
+            const yesterday = new Date(now);
+            yesterday.setDate(yesterday.getDate() - 1);
+            if (date.getDate() === yesterday.getDate() && 
+                date.getMonth() === yesterday.getMonth() && 
+                date.getFullYear() === yesterday.getFullYear()) {
+                return '昨天';
+            }
+            
+            // 一周内
+            if (diffDays > 0 && diffDays < 7) {
+                return `${diffDays} 天前`;
+            }
+            
+            // 其他显示具体日期
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            
+            // 如果是今年，不显示年份
+            if (year === now.getFullYear()) {
+                return `${month}月${day}日`;
+            }
+            
+            return `${year}年${month}月${day}日`;
+        }
+
+        // 创建文章卡片
+        function createPostCard(post) {
+            const card = document.createElement('div');
+            card.className = 'blog-card';
+            card.innerHTML = `
+                <div class="post-title">${escapeHtml(post.title)}</div>
+                <div class="post-date">
+                    <md-icon>schedule</md-icon>
+                    <span>${formatDate(post.date)}</span>
+                </div>
+            `;
+            
+            card.addEventListener('click', () => {
+                window.location.href = './' + post.path;
+            });
+            
+            return card;
+        }
+
+        // HTML 转义防止 XSS
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // 显示 Toast
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2500);
+        }
+
+        // 渲染文章列表
+        function renderPosts(posts) {
+            const container = document.getElementById('postsContainer');
+            container.innerHTML = '';
+            
+            if (!posts || posts.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <md-icon>article</md-icon>
+                        <div>暂无文章</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            // 按日期排序（最新的在前）
+            const sortedPosts = [...posts].sort((a, b) => {
+                return new Date(b.date) - new Date(a.date);
+            });
+            
+            sortedPosts.forEach(post => {
+                container.appendChild(createPostCard(post));
+            });
+        }
+
+        // 显示错误状态
+        function showError() {
+            const container = document.getElementById('postsContainer');
+            container.innerHTML = `
+                <div class="error-state">
+                    <md-icon>error_outline</md-icon>
+                    <div>加载失败，请稍后重试</div>
+                </div>
+            `;
+        }
+
+        // 加载文章列表
+        async function loadPosts() {
+            try {
+                const response = await fetch('./posts.json');
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const posts = await response.json();
+                renderPosts(posts);
+            } catch (error) {
+                console.error('Failed to load posts:', error);
+                showError();
+            }
+        }
+
+        // 分享功能
+        document.getElementById('shareBtn').addEventListener('click', async () => {
+            const shareUrl = 'https://gitxhj.github.i/blog.html';
+            
+            try {
+                await navigator.clipboard.writeText(shareUrl);
+                showToast('链接已复制到剪贴板');
+            } catch (err) {
+                // 降级方案：使用 execCommand
+                const textarea = document.createElement('textarea');
+                textarea.value = shareUrl;
+                textarea.style.position = 'fixed';
+                textarea.style.left = '-9999px';
+                document.body.appendChild(textarea);
+                textarea.select();
+                
+                try {
+                    document.execCommand('copy');
+                    showToast('链接已复制到剪贴板');
+                } catch (e) {
+                    showToast('复制失败，请手动复制');
+                }
+                
+                document.body.removeChild(textarea);
+            }
+        });
+
+        // 页面加载完成后加载文章
+        loadPosts();
+    </script>
+
+</body>
+</html>
