@@ -1,1 +1,107 @@
+    :root {
+      /* Material 3 调色板 - 浅色模式 */
+      --md-sys-color-primary: #0061a4;
+      --md-sys-color-on-primary: #ffffff;
+      --md-sys-color-surface: #fdfbff;
+      --md-sys-color-on-surface: #1a1c1e;
+      --md-sys-color-surface-variant: #e0e2ec;
+      --md-sys-color-on-surface-variant: #44474e;
+      --md-sys-color-outline: #74777f;
+      --md-sys-typescale-body-large-font: 'Noto Sans SC', 'Roboto', sans-serif;
+    }
 
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: var(--md-sys-color-surface);
+      color: var(--md-sys-color-on-surface);
+      font-family: var(--md-sys-typescale-body-large-font);
+      line-height: 1.6;
+      display: flex;
+      justify-content: center;
+    }
+
+    .container {
+      max-width: 800px;
+      width: 100%;
+      padding: 40px 24px;
+      animation: fadeIn 0.8s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Header 样式 */
+    header {
+      margin-bottom: 48px;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 12px;
+      color: var(--md-sys-color-on-surface);
+    }
+
+    .meta-info {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      color: var(--md-sys-color-on-surface-variant);
+      font-size: 0.9rem;
+    }
+
+    .date-chip {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* 文章内容样式 - 增强可读性 */
+    article {
+      font-size: 1.125rem;
+      color: var(--md-sys-color-on-surface);
+    }
+
+    article p {
+      margin-bottom: 24px;
+    }
+
+    article h2 {
+      margin-top: 40px;
+      margin-bottom: 16px;
+      font-size: 1.75rem;
+    }
+
+    /* M3 风格的分割线 */
+    hr {
+      border: 0;
+      border-top: 1px solid var(--md-sys-color-outline);
+      opacity: 0.2;
+      margin: 48px 0;
+    }
+
+    /* 交互组件区域 */
+    .actions {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 32px;
+      flex-wrap: wrap;
+    }
+
+    /* Giscus 容器美化 */
+    #giscus-container {
+      background-color: var(--md-sys-color-surface-variant);
+      border-radius: 16px;
+      padding: 20px;
+      min-height: 150px;
+    }
+
+    /* 响应式调整 */
+    @media (max-width: 600px) {
+      h1 { font-size: 1.8rem; }
+      .container { padding: 24px 16px; }
+    }
