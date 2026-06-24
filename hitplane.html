@@ -1,0 +1,1421 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>会考前夕打飞机概率统计</title>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js">
+    </script>
+    <style>
+        /* ===== 全局重置 & 基础 ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', 'Microsoft YaHei', monospace;
+            background-color: #f8f4ed;
+            /* 奶白色 */
+            min-height: 100vh;
+            padding: 30px 20px;
+            position: relative;
+            overflow-x: hidden;
+            color: #1a1a1a;
+        }
+
+        /* ===== 背景几何图形 ===== */
+        .geo-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+        .geo-bg .shape {
+            position: absolute;
+            opacity: 0.10;
+            border: 2px solid #222;
+            background: transparent;
+        }
+        .geo-bg .shape-1 {
+            width: 200px;
+            height: 200px;
+            top: 5%;
+            left: 3%;
+            transform: rotate(12deg);
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+            background: rgba(0, 0, 0, 0.03);
+        }
+        .geo-bg .shape-2 {
+            width: 140px;
+            height: 140px;
+            bottom: 8%;
+            right: 5%;
+            transform: rotate(25deg);
+            border: 2px solid #222;
+            background: rgba(0, 0, 0, 0.03);
+        }
+        .geo-bg .shape-3 {
+            width: 260px;
+            height: 180px;
+            top: 30%;
+            right: 2%;
+            transform: rotate(-8deg);
+            clip-path: polygon(0% 0%, 100% 0%, 80% 100%, 20% 100%);
+            background: rgba(0, 0, 0, 0.02);
+        }
+        .geo-bg .shape-4 {
+            width: 120px;
+            height: 120px;
+            bottom: 25%;
+            left: 2%;
+            transform: rotate(45deg);
+            border: 2px solid #222;
+            background: rgba(0, 0, 0, 0.02);
+        }
+        .geo-bg .shape-5 {
+            width: 80px;
+            height: 80px;
+            top: 12%;
+            left: 50%;
+            transform: rotate(10deg);
+            clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+            background: rgba(0, 0, 0, 0.03);
+        }
+
+        /* ===== 主容器 ===== */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ===== 直角 + 黑色边框 通用 ===== */
+        .box {
+            border: 2px solid #000;
+            border-radius: 0 !important;
+            background: #fffcf7;
+            box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.08);
+            transition: background 0.15s ease;
+        }
+        .box.clickable:active {
+            background: #d4d4d4 !important;
+        }
+
+        /* ===== 标题区域 ===== */
+        .header {
+            padding: 28px 32px;
+            margin-bottom: 28px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            background: #fcf9f4;
+            border: 2px solid #000;
+            position: relative;
+        }
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .header h1 .icon {
+            font-size: 32px;
+            line-height: 1;
+        }
+        .header .sub {
+            font-size: 14px;
+            color: #333;
+            border-left: 2px solid #000;
+            padding-left: 18px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .header .sub .badge {
+            border: 2px solid #000;
+            padding: 4px 12px;
+            font-size: 13px;
+            background: #f0ebe2;
+        }
+
+        /* ===== 统计卡片行 ===== */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+        .stat-card {
+            padding: 20px 18px;
+            text-align: center;
+            background: #fcf9f4;
+            border: 2px solid #000;
+            cursor: default;
+            transition: background 0.15s ease;
+        }
+        .stat-card .num {
+            font-size: 38px;
+            font-weight: 700;
+            line-height: 1.2;
+            letter-spacing: 1px;
+        }
+        .stat-card .label {
+            font-size: 14px;
+            color: #444;
+            margin-top: 6px;
+            border-top: 1px solid #ccc;
+            padding-top: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .stat-card .label .icon-sm {
+            font-size: 18px;
+        }
+
+        /* 各卡片主题色 */
+        .stat-card.total .num {
+            color: #1a1a1a;
+        }
+        .stat-card.yes .num {
+            color: #2c6e49;
+        }
+        .stat-card.no .num {
+            color: #c0392b;
+        }
+        .stat-card.rate .num {
+            color: #b9770e;
+        }
+
+        /* ===== 图表行 ===== */
+        .charts-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+        .chart-box {
+            padding: 20px 20px 16px;
+            background: #fcf9f4;
+            border: 2px solid #000;
+        }
+        .chart-box .chart-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 2px solid #000;
+            padding-bottom: 8px;
+        }
+        .chart-box .chart-wrap {
+            position: relative;
+            height: 260px;
+        }
+        .chart-box .chart-wrap canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        /* ===== 详细数据列表 ===== */
+        .detail-section {
+            margin-bottom: 28px;
+        }
+        .detail-section .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 2px solid #000;
+            padding-bottom: 8px;
+        }
+        .detail-list {
+            border: 2px solid #000;
+            background: #fcf9f4;
+            overflow: hidden;
+        }
+        .detail-item {
+            display: grid;
+            grid-template-columns: 60px 1fr 120px;
+            align-items: center;
+            padding: 12px 20px;
+            border-bottom: 1px solid #222;
+            transition: background 0.15s ease;
+            cursor: default;
+        }
+        .detail-item:last-child {
+            border-bottom: none;
+        }
+        .detail-item .idx {
+            font-weight: 700;
+            color: #555;
+            font-size: 14px;
+        }
+        .detail-item .answer {
+            font-size: 15px;
+            font-weight: 500;
+        }
+        .detail-item .answer .tag {
+            display: inline-block;
+            border: 2px solid #000;
+            padding: 0 10px;
+            font-size: 12px;
+            margin-right: 8px;
+            font-weight: 700;
+        }
+        .detail-item .answer .tag.yes-tag {
+            background: #2c6e49;
+            color: #fff;
+        }
+        .detail-item .answer .tag.no-tag {
+            background: #c0392b;
+            color: #fff;
+        }
+        .detail-item .reason {
+            font-size: 13px;
+            color: #444;
+            text-align: right;
+            font-style: italic;
+        }
+        .detail-item:active {
+            background: #d4d4d4 !important;
+        }
+
+        /* ===== 进度条 + 频数表 行 ===== */
+        .bottom-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+        .bottom-box {
+            padding: 20px 22px;
+            background: #fcf9f4;
+            border: 2px solid #000;
+        }
+        .bottom-box .box-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 2px solid #000;
+            padding-bottom: 8px;
+        }
+
+        /* 进度条 */
+        .progress-group {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+        .progress-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .progress-item .p-label {
+            width: 56px;
+            font-weight: 600;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+        .progress-item .p-track {
+            flex: 1;
+            height: 28px;
+            border: 2px solid #000;
+            background: #fff;
+            position: relative;
+        }
+        .progress-item .p-track .p-fill {
+            height: 100%;
+            width: 0%;
+            background: #2c6e49;
+            transition: width 0.5s ease;
+        }
+        .progress-item .p-track .p-fill.no-fill {
+            background: #c0392b;
+        }
+        .progress-item .p-value {
+            width: 52px;
+            text-align: right;
+            font-weight: 700;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        /* 频数表 */
+        .freq-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 15px;
+        }
+        .freq-table th,
+        .freq-table td {
+            border: 2px solid #000;
+            padding: 10px 14px;
+            text-align: center;
+        }
+        .freq-table th {
+            background: #e8e2d8;
+            font-weight: 700;
+        }
+        .freq-table .highlight-yes {
+            background: #e6f2ea;
+        }
+        .freq-table .highlight-no {
+            background: #f2e6e4;
+        }
+        .freq-table .total-row {
+            background: #e8e2d8;
+            font-weight: 700;
+        }
+        .freq-table .bar-cell {
+            position: relative;
+        }
+        .freq-table .bar-cell .mini-bar {
+            display: block;
+            height: 16px;
+            background: #2c6e49;
+            border: 1px solid #000;
+            margin: 0 auto;
+            transition: width 0.5s ease;
+        }
+        .freq-table .bar-cell .mini-bar.no-bar {
+            background: #c0392b;
+        }
+
+        /* ===== 响应式 ===== */
+        @media (max-width: 960px) {
+            .stats-row {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .charts-row {
+                grid-template-columns: 1fr;
+            }
+            .bottom-row {
+                grid-template-columns: 1fr;
+            }
+        }
+        @media (max-width: 600px) {
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+                padding: 20px;
+            }
+            .header .sub {
+                border-left: none;
+                padding-left: 0;
+                border-top: 2px solid #000;
+                padding-top: 12px;
+                width: 100%;
+            }
+            .stats-row {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+            .stat-card .num {
+                font-size: 28px;
+            }
+            .detail-item {
+                grid-template-columns: 40px 1fr;
+                gap: 4px;
+                padding: 10px 14px;
+            }
+            .detail-item .reason {
+                text-align: left;
+                grid-column: 2 / 3;
+                font-size: 12px;
+            }
+            .detail-item .idx {
+                grid-row: 1 / 2;
+            }
+            .detail-item .answer {
+                grid-row: 1 / 2;
+                grid-column: 2 / 3;
+            }
+            .bottom-row {
+                grid-template-columns: 1fr;
+            }
+            .freq-table th,
+            .freq-table td {
+                padding: 6px 8px;
+                font-size: 13px;
+            }
+        }
+
+        /* ===== 工具类 ===== */
+        .text-muted {
+            color: #666;
+        }
+        .mt-8 {
+            margin-top: 8px;
+        }
+
+        /* 点击交互 (按下灰色) */
+        .clickable {
+            cursor: pointer;
+            user-select: none;
+        }
+
+        /* 统计卡片点击 */
+        .stat-card.clickable:active {
+            background: #d4d4d4 !important;
+        }
+
+        /* ===== 页脚 ===== */
+        .footer {
+            text-align: center;
+            padding: 16px 0 4px;
+            font-size: 13px;
+            color: #666;
+            border-top: 2px solid #000;
+            background: #fcf9f4;
+            padding: 16px 20px;
+            border: 2px solid #000;
+            margin-top: 8px;
+        }
+        .footer span {
+            border-right: 1px solid #999;
+            padding-right: 16px;
+            margin-right: 16px;
+        }
+        .footer span:last-child {
+            border-right: none;
+            padding-right: 0;
+            margin-right: 0;
+        }
+        /* ===== 结论报告样式 ===== */
+.conclusion-box {
+    border: 2px solid #000;
+    background: #fcf9f4;
+    padding: 32px 36px;
+    margin-bottom: 28px;
+    font-size: 15px;
+    line-height: 1.8;
+    color: #1a1a1a;
+}
+.conclusion-box p {
+    margin: 0 0 1em 0;
+    text-indent: 2em;
+}
+.conclusion-box p:last-child {
+    margin-bottom: 0;
+}
+.conclusion-box .stat-num {
+    font-weight: 700;
+    font-size: 1.05em;
+    border-bottom: 2px solid #000;
+    padding-bottom: 0.1em;
+    display: inline-block;
+}
+.conclusion-box .term {
+    font-weight: 600;
+    font-style: italic;
+    background: #e8e2d8;
+    padding: 0 6px;
+    border: 1px solid #000;
+}
+.conclusion-box .divider-line {
+    display: block;
+    border-top: 2px solid #000;
+    margin: 1.4em 0 1.2em 0;
+    width: 80px;
+}
+@media (max-width: 600px) {
+    .conclusion-box {
+        padding: 20px 18px;
+        font-size: 14px;
+    }
+    .conclusion-box p {
+        text-indent: 1.6em;
+    }
+}
+/* ===== 倒U型曲线图表样式 ===== */
+.theory-chart-box {
+    border: 2px solid #000;
+    background: #fcf9f4;
+    padding: 24px 26px 16px;
+    margin-bottom: 28px;
+}
+.theory-chart-box .theory-chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    border-bottom: 2px solid #000;
+    padding-bottom: 10px;
+    margin-bottom: 16px;
+}
+.theory-chart-box .theory-chart-header .main-title {
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: #1a1a1a;
+}
+.theory-chart-box .theory-chart-header .sub-tag {
+    font-size: 13px;
+    font-weight: 400;
+    color: #444;
+    border-left: 2px solid #000;
+    padding-left: 14px;
+}
+.theory-chart-wrap {
+    position: relative;
+    height: 280px;
+    width: 100%;
+}
+@media (max-width: 600px) {
+    .theory-chart-box {
+        padding: 16px 14px 10px;
+    }
+    .theory-chart-box .theory-chart-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+    }
+    .theory-chart-box .theory-chart-header .sub-tag {
+        border-left: none;
+        padding-left: 0;
+        font-size: 12px;
+    }
+    .theory-chart-wrap {
+        height: 220px;
+    }
+}
+/* ===== 高级统计图表容器（新增） ===== */
+.advanced-charts-section {
+    margin-bottom: 28px;
+}
+.advanced-charts-section .section-title {
+    font-size: 20px;
+    font-weight: 700;
+    border-bottom: 2px solid #000;
+    padding-bottom: 8px;
+    margin-bottom: 16px;
+}
+.advanced-charts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+}
+.advanced-chart-card {
+    border: 2px solid #000;
+    background: #fcf9f4;
+    padding: 18px 18px 12px;
+}
+.advanced-chart-card .card-header {
+    font-weight: 600;
+    font-size: 15px;
+    border-bottom: 2px solid #000;
+    padding-bottom: 6px;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+}
+.advanced-chart-card .card-header .sub {
+    font-weight: 400;
+    font-size: 13px;
+    color: #444;
+}
+.advanced-chart-card .chart-container {
+    position: relative;
+    height: 220px;
+}
+.advanced-chart-card .chart-container canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+@media (max-width: 960px) {
+    .advanced-charts-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+@media (max-width: 600px) {
+    .advanced-charts-grid {
+        grid-template-columns: 1fr;
+    }
+    .advanced-chart-card .chart-container {
+        height: 180px;
+    }
+}
+    </style>
+</head>
+<body>
+
+    <!-- 背景几何图形 -->
+    <div class="geo-bg">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+        <div class="shape shape-4"></div>
+        <div class="shape shape-5"></div>
+    </div>
+
+    <div class="container">
+
+        <!-- ===== 标题 ===== -->
+        <header class="header">
+            <h1>
+               
+                会考前夕打飞机概率统计
+            </h1>
+            <div class="sub">
+                <span>2026.06.24</span>
+                <span class="badge">样本量 N = 5</span>
+                <span>匿名调研</span>
+            </div>
+        </header>
+
+        <!-- ===== 统计卡片 ===== -->
+        <section class="stats-row">
+            <div class="stat-card total clickable" onclick="this.classList.add('active'); setTimeout(()=>this.classList.remove('active'),120)">
+                <div class="num">5</div>
+                <div class="label">总参与人数</div>
+            </div>
+            <div class="stat-card yes clickable" onclick="this.classList.add('active'); setTimeout(()=>this.classList.remove('active'),120)">
+                <div class="num">1</div>
+                <div class="label"> 会打飞机</div>
+            </div>
+            <div class="stat-card no clickable" onclick="this.classList.add('active'); setTimeout(()=>this.classList.remove('active'),120)">
+                <div class="num">4</div>
+                <div class="label"> 不会打飞机</div>
+            </div>
+            <div class="stat-card rate clickable" onclick="this.classList.add('active'); setTimeout(()=>this.classList.remove('active'),120)">
+                <div class="num">20%</div>
+                <div class="label"> 会考率</div>
+            </div>
+        </section>
+
+        <!-- ===== 图表区域 ===== -->
+        <section class="charts-row">
+            <!-- 饼图 -->
+            <div class="chart-box">
+                <div class="chart-title">比例分布</div>
+                <div class="chart-wrap">
+                    <canvas id="pieChart"></canvas>
+                </div>
+            </div>
+            <!-- 柱状图 -->
+            <div class="chart-box">
+                <div class="chart-title">频数对比</div>
+                <div class="chart-wrap">
+                    <canvas id="barChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== 详细数据列表 ===== -->
+        <section class="detail-section">
+            <div class="section-title"> 原始数据明细</div>
+            <div class="detail-list">
+                <div class="detail-item clickable" onclick="this.classList.add('active'); setTimeout(()=>this.classList.remove('active'),120)">
+                    <span class="idx">#01</span>
+                    <span class="answer"><span class="tag no-tag">不会</span> 没你照片</span>
+                    <span class="reason">"没你照片"</span>
+                </div>
+                <div class="detail-item clickable" onclick="this.classList.add('active'); setTimeout(()=>this.classList.remove('active'),120)">
+                    <span class="idx">#02</span>
+                    <span class="answer"><span class="tag no-tag">不会</span> 没打过</span>
+                    <span class="reason">"没打过"</span>
+                </div>
+                <div class="detail-item clickable" onclick="this.classList.add('active'); setTimeout(()=>this.classList.remove('active'),120)">
+                    <span class="idx">#03</span>
+                    <span class="answer"><span class="tag yes-tag">会</span> 我只指导昏 在家不考了</span>
+                    <span class="reason">"我只指导昏在家不考了"</span>
+                </div>
+                <div class="detail-item clickable" onclick="this.classList.add('active'); setTimeout(()=>this.classList.remove('active'),120)">
+                    <span class="idx">#04</span>
+                    <span class="answer"><span class="tag no-tag">不会</span> 打了飞机违法</span>
+                    <span class="reason">"打了飞机违法"</span>
+                </div>
+                <div class="detail-item clickable" onclick="this.classList.add('active'); setTimeout(()=>this.classList.remove('active'),120)">
+                    <span class="idx">#05</span>
+                    <span class="answer"><span class="tag no-tag">不会</span> 自慰损智 sb吧</span>
+                    <span class="reason">"自慰损智 sb吧"</span>
+                </div>
+            </div>
+        </section>
+<div class="advanced-charts-section">
+    
+    <div class="advanced-charts-grid">
+
+        <!-- 图表1：分簇散点图（Swarm Plot）展示个体分布 -->
+        <div class="advanced-chart-card">
+            <div class="card-header">
+                <span>分簇散点图</span>
+                <span class="sub">个体响应分布</span>
+            </div>
+            <div class="chart-container">
+                <canvas id="swarmChart"></canvas>
+            </div>
+        </div>
+
+        <!-- 图表2：比例与95%置信区间（Wilson区间） -->
+        <div class="advanced-chart-card">
+            <div class="card-header">
+                <span>比例与置信区间</span>
+                <span class="sub">95% Wilson 区间</span>
+            </div>
+            <div class="chart-container">
+                <canvas id="ciBarChart"></canvas>
+            </div>
+        </div>
+
+        <!-- 图表3：个体响应序列图（按原始顺序排列） -->
+        <div class="advanced-chart-card">
+            <div class="card-header">
+                <span>个体响应序列</span>
+                <span class="sub">按序展示</span>
+            </div>
+            <div class="chart-container">
+                <canvas id="sequenceChart"></canvas>
+            </div>
+        </div>
+
+    </div>
+</div>
+        <!-- ===== 底部：进度条 + 频数表 ===== -->
+        <section class="bottom-row">
+            <!-- 进度条 -->
+            <div class="bottom-box">
+                <div class="box-title"> 占比进度条</div>
+                <div class="progress-group">
+                    <div class="progress-item">
+                        <span class="p-label" style="color:#2c6e49;">会</span>
+                        <div class="p-track">
+                            <div class="p-fill" id="progressYes" style="width:20%;"></div>
+                        </div>
+                        <span class="p-value" id="pValYes">20%</span>
+                    </div>
+                    <div class="progress-item">
+                        <span class="p-label" style="color:#c0392b;">不会</span>
+                        <div class="p-track">
+                            <div class="p-fill no-fill" id="progressNo" style="width:80%;"></div>
+                        </div>
+                        <span class="p-value" id="pValNo">80%</span>
+                    </div>
+                </div>
+                <div style="margin-top:16px;padding-top:12px;border-top:2px solid #000;font-size:13px;color:#444;display:flex;justify-content:space-between;flex-wrap:wrap;">
+                    <span>会考率 = 1 / 5 = 20%</span>
+                    <span>不会率 = 4 / 5 = 80%</span>
+                </div>
+            </div>
+
+            <!-- 频数统计表 -->
+            <div class="bottom-box">
+                <div class="box-title"> 频数统计表</div>
+                <table class="freq-table">
+                    <thead>
+                        <tr>
+                            <th>类别</th>
+                            <th>频数</th>
+                            <th>百分比</th>
+                            <th>占比条形</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="highlight-yes">
+                            <td><strong>会</strong></td>
+                            <td>1</td>
+                            <td>20%</td>
+                            <td class="bar-cell">
+                                <span class="mini-bar" style="width:20%;"></span>
+                            </td>
+                        </tr>
+                        <tr class="highlight-no">
+                            <td><strong>不会</strong></td>
+                            <td>4</td>
+                            <td>80%</td>
+                            <td class="bar-cell">
+                                <span class="mini-bar no-bar" style="width:80%;"></span>
+                            </td>
+                        </tr>
+                        <tr class="total-row">
+                            <td><strong>合计</strong></td>
+                            <td><strong>5</strong></td>
+                            <td><strong>100%</strong></td>
+                            <td>—</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+<div class="conclusion-box">
+
+    <p>
+        基于五份有效回应，本次小范围调研呈现出一种耐人寻味的二元对立格局。明确表态“会”在会考前进行“打飞机”行为的仅有一人，占总体的百分之二十；而其余四人则持否定或回避姿态，占比高达百分之八十。若仅从数字表面观察，否定方占据了压倒性多数，似乎暗示着在重大考试前夕，青少年群体普遍倾向于抑制与性相关的自慰行为。然而，当我们逐条审视每位受访者给出的具体理由时，情况便远非“多数与少数”这般简单。否定者的依据分别指向“未曾有过此类经历”“法律层面的顾虑”以及“对智力损伤的担忧” —— 这三者分别对应着经验空白、制度规训与健康焦虑，彼此之间并无统一的逻辑内核。尤其是“自慰损智”这一说法，带有鲜明的民间迷思色彩，其源头可追溯至传统养生观念中对于“精液宝贵”的朴素认知，但在现代性医学框架下早已被证伪。这提示我们，受访者的否定回答在很大程度上并非源于理性的利弊权衡，而是受到文化惯性、道德耻感以及信息不对称的共同塑造。
+    </p>
+
+    <span class="divider-line"></span>
+
+    <p>
+        反观唯一给出肯定回答的个体，其附注“我只指导昏，在家不考了”提供了更具张力的解读空间。“指导昏”可能是“指导复习至昏沉”的口语化缩写，暗示该受访者在备考过程中已投入大量精力，身心处于高度紧绷状态；而“在家不考了”则指向居家环境这一特定场景，与其余四人可能所处的教室或宿舍公共空间形成鲜明对比。换言之，肯定者并非出于放纵或轻视考试，反而可能恰恰是因为承受了高强度的复习压力，从而在私密居家环境中寻求一种生理层面的短暂释放。这与心理学中“压力—性唤起”的应激调节理论存在暗合之处，即个体在高焦虑情境下，可能通过自慰行为快速降低皮质醇水平，以恢复情绪平衡。遗憾的是，本组样本未能采集考前焦虑量表的客观数据，亦未区分行为发生的具体时间点（考前一月、一周或前夜），这使得我们无法进一步验证上述推论。
+    </p>
+<div class="theory-chart-box">
+    <div class="theory-chart-header">
+        <span class="main-title">压力水平与自慰行为频率的假设关系</span>
+        <span class="sub-tag">理论模型</span>
+    </div>
+    <div class="theory-chart-wrap">
+        <canvas id="theoryChart"></canvas>
+    </div>
+</div>
+    <p>
+        就统计效力而言，样本容量为五的极端小样本决定了任何比例计算都不具备推断总体趋势的数学基础，百分之二十与八十的差距在统计学上亦无显著性意义。但本报告的真正价值不在于得出普适性结论，而在于揭示了一个值得深挖的研究切口：应试压力与青少年性自慰行为之间是否存在倒U型曲线关系 —— 即中等程度压力下行为频率上升，过高或过低压力下行为频率反而下降。同时，本次调查中百分之百的回复率（五人均提供了有效理由）也侧面说明，即便在涉及性隐私的议题上，以匿名的、去严肃化的方式收集数据仍可获得较为坦诚的回应。后续研究若能将样本扩大至五十人以上，并引入标准化焦虑自评量表和事件记录日志，同时控制性别、年龄、寄宿与否等混杂变量，则有望真正厘清“大考前夕”这一特殊时间窗口内，青少年性行为与认知表现之间的复杂关联。在此之前，任何关于“会考打飞机影响成绩”的论断，均应被视为未经证实的假说，而非事实。
+    </p>
+
+</div>
+        <!-- ===== 页脚 ===== -->
+        <footer class="footer">
+            
+            <span>统计时间：2026.06.24</span>
+            
+        </footer>
+
+    </div>
+
+    <script>
+    
+        // ============================================================
+        // 1. 数据
+        // ============================================================
+        const DATA = {
+            labels: ['会', '不会'],
+            counts: [1, 4],
+            colors: ['#2c6e49', '#c0392b'],
+            total: 5,
+            percentages: [20, 80]
+        };
+
+        // ============================================================
+        // 2. Chart.js 图表
+        // ============================================================
+        // --- 2.1 饼图 ---
+        const pieCtx = document.getElementById('pieChart').getContext('2d');
+        new Chart(pieCtx, {
+            type: 'pie',
+            data: {
+                labels: DATA.labels,
+                datasets: [{
+                    data: DATA.counts,
+                    backgroundColor: DATA.colors,
+                    borderColor: '#000',
+                    borderWidth: 2,
+                    hoverOffset: 6,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            font: {
+                                family: 'Courier New, monospace',
+                                size: 13,
+                                weight: 'bold'
+                            },
+                            padding: 16,
+                            usePointStyle: true,
+                            pointStyle: 'rect',
+                            color: '#1a1a1a'
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                let pct = ((context.parsed / total) * 100).toFixed(1);
+                                return context.label + ': ' + context.parsed + '人 (' + pct + '%)';
+                            }
+                        }
+                    }
+                },
+                layout: {
+                    padding: {
+                        top: 4,
+                        bottom: 4
+                    }
+                }
+            }
+        });
+
+        // --- 2.2 柱状图 ---
+        const barCtx = document.getElementById('barChart').getContext('2d');
+        new Chart(barCtx, {
+            type: 'bar',
+            data: {
+                labels: DATA.labels,
+                datasets: [{
+                    label: '人数',
+                    data: DATA.counts,
+                    backgroundColor: DATA.colors,
+                    borderColor: '#000',
+                    borderWidth: 2,
+                    borderRadius: 0,
+                    barPercentage: 0.6,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                let pct = ((context.parsed.y / total) * 100).toFixed(1);
+                                return context.parsed.y + '人 (' + pct + '%)';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 5,
+                        ticks: {
+                            stepSize: 1,
+                            font: {
+                                family: 'Courier New, monospace',
+                                size: 12,
+                                weight: 'bold'
+                            },
+                            color: '#1a1a1a'
+                        },
+                        grid: {
+                            color: '#ccc',
+                            drawBorder: true,
+                            borderColor: '#000',
+                            borderWidth: 2,
+                            tickBorderDash: [2, 2]
+                        },
+                        border: {
+                            color: '#000',
+                            width: 2
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            font: {
+                                family: 'Courier New, monospace',
+                                size: 14,
+                                weight: 'bold'
+                            },
+                            color: '#1a1a1a'
+                        },
+                        border: {
+                            color: '#000',
+                            width: 2
+                        }
+                    }
+                },
+                layout: {
+                    padding: {
+                        top: 8,
+                        bottom: 4
+                    }
+                }
+            }
+        });
+        (function() {
+    // 真实数据：5人，1人会（编码1），4人不会（编码0）
+    var responses = [1, 0, 0, 0, 0]; // 对应原始顺序
+    var n = responses.length;
+    var k = responses.reduce(function(a,b) { return a + b; }, 0); // 1
+    var p = k / n;
+
+    // ============================================================
+    // 1. 分簇散点图 (Swarm Plot)
+    // ============================================================
+    var swarmCtx = document.getElementById('swarmChart').getContext('2d');
+    // 会（0）和不会（1）分别赋予x坐标，y轴添加微抖动避免重叠
+    var swarmData = [];
+    var yesCount = 0, noCount = 0;
+    responses.forEach(function(val) {
+        if (val === 1) {
+            // 会的只有1人，放在y=0
+            swarmData.push({ x: 0, y: 0 });
+        } else {
+            // 不会的4人，在y轴上分散
+            var offset = (noCount - 1.5) * 0.2; // 均匀散布
+            swarmData.push({ x: 1, y: offset });
+            noCount++;
+        }
+    });
+
+    new Chart(swarmCtx, {
+        type: 'scatter',
+        data: {
+            datasets: [{
+                label: '受访者',
+                data: swarmData,
+                backgroundColor: function(context) {
+                    return context.parsed.x === 0 ? '#2c6e49' : '#c0392b';
+                },
+                borderColor: '#000',
+                borderWidth: 2,
+                pointRadius: 8,
+                pointHoverRadius: 10,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            var label = context.parsed.x === 0 ? '会' : '不会';
+                            return label + ' (个体)';
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    type: 'category',
+                    labels: ['会', '不会'],
+                    border: { color: '#000', width: 2 },
+                    grid: { display: false },
+                    ticks: { font: { family: 'Courier New, monospace', weight: 'bold' } }
+                },
+                y: {
+                    display: false,
+                    min: -0.6,
+                    max: 0.6,
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+
+    // ============================================================
+    // 2. 带置信区间的条形图（Wilson 95% CI）
+    // ============================================================
+    var ciCtx = document.getElementById('ciBarChart').getContext('2d');
+    var z = 1.96;
+    var center = p;
+    var wilsonLower = (p + z*z/(2*n) - z*Math.sqrt(p*(1-p)/n + z*z/(4*n*n))) / (1 + z*z/n);
+    var wilsonUpper = (p + z*z/(2*n) + z*Math.sqrt(p*(1-p)/n + z*z/(4*n*n))) / (1 + z*z/n);
+    var centerPct = center * 100;
+    var lowerPct = Math.max(0, wilsonLower * 100);
+    var upperPct = Math.min(100, wilsonUpper * 100);
+
+    new Chart(ciCtx, {
+        type: 'bar',
+        data: {
+            labels: ['会打飞机比例'],
+            datasets: [{
+                label: '比例 (%)',
+                data: [centerPct],
+                backgroundColor: '#2c6e49',
+                borderColor: '#000',
+                borderWidth: 2,
+                borderRadius: 0,
+                barPercentage: 0.4,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return '比例: ' + context.parsed.y.toFixed(1) + '%';
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    ticks: { callback: function(v) { return v + '%'; }, font: { family: 'Courier New, monospace' } },
+                    border: { color: '#000', width: 2 },
+                    grid: { color: '#d9d4cd' }
+                },
+                x: {
+                    grid: { display: false },
+                    border: { color: '#000', width: 2 },
+                    ticks: { font: { family: 'Courier New, monospace', weight: 'bold' } }
+                }
+            }
+        },
+        plugins: [{
+            id: 'errorBars',
+            afterDraw: function(chart) {
+                var ctx = chart.ctx;
+                var xAxis = chart.scales.x;
+                var yAxis = chart.scales.y;
+                var centerX = xAxis.getPixelForValue(0);
+                var yCenter = yAxis.getPixelForValue(centerPct);
+                var yLow = yAxis.getPixelForValue(lowerPct);
+                var yHigh = yAxis.getPixelForValue(upperPct);
+
+                ctx.save();
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 2.5;
+                ctx.beginPath();
+                ctx.moveTo(centerX, yLow);
+                ctx.lineTo(centerX, yHigh);
+                ctx.stroke();
+                var tick = 6;
+                ctx.beginPath();
+                ctx.moveTo(centerX - tick, yLow);
+                ctx.lineTo(centerX + tick, yLow);
+                ctx.moveTo(centerX - tick, yHigh);
+                ctx.lineTo(centerX + tick, yHigh);
+                ctx.stroke();
+                ctx.font = '12px Courier New, monospace';
+                ctx.fillStyle = '#1a1a1a';
+                ctx.textAlign = 'center';
+                ctx.fillText('95% CI', centerX, yLow - 10);
+                ctx.fillText('[' + lowerPct.toFixed(1) + '%, ' + upperPct.toFixed(1) + '%]', centerX, yHigh + 20);
+                ctx.restore();
+            }
+        }]
+    });
+
+    // ============================================================
+    // 3. 个体响应序列图（按原始顺序展示0/1）
+    // ============================================================
+    var seqCtx = document.getElementById('sequenceChart').getContext('2d');
+    var seqLabels = ['#01', '#02', '#03', '#04', '#05'];
+    var seqData = responses.map(function(v) { return v * 100; }); // 0或100
+
+    new Chart(seqCtx, {
+        type: 'bar',
+        data: {
+            labels: seqLabels,
+            datasets: [{
+                label: '响应 (0=不会, 1=会)',
+                data: seqData,
+                backgroundColor: function(context) {
+                    return context.parsed.y === 100 ? '#2c6e49' : '#c0392b';
+                },
+                borderColor: '#000',
+                borderWidth: 2,
+                borderRadius: 0,
+                barPercentage: 0.6,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.parsed.y === 100 ? '会' : '不会';
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 110,
+                    ticks: {
+                        stepSize: 50,
+                        callback: function(v) { return v === 0 ? '不会' : (v === 100 ? '会' : ''); },
+                        font: { family: 'Courier New, monospace', size: 11 }
+                    },
+                    border: { color: '#000', width: 2 },
+                    grid: { color: '#d9d4cd' }
+                },
+                x: {
+                    grid: { display: false },
+                    border: { color: '#000', width: 2 },
+                    ticks: { font: { family: 'Courier New, monospace', weight: 'bold' } }
+                }
+            }
+        }
+    });
+
+})();
+        (function() {
+    var ctx = document.getElementById('theoryChart').getContext('2d');
+
+    var theoryData = [
+        { x: 1, y: 1.0 },
+        { x: 2, y: 2.3 },
+        { x: 3, y: 3.8 },
+        { x: 4, y: 4.7 },
+        { x: 5, y: 4.0 },
+        { x: 6, y: 2.5 },
+        { x: 7, y: 0.9 }
+    ];
+
+    new Chart(ctx, {
+        type: 'scatter',
+        data: {
+            datasets: [{
+                label: '拟合趋势线',
+                data: theoryData,
+                backgroundColor: '#1a1a1a',
+                borderColor: '#1a1a1a',
+                borderWidth: 3,
+                pointRadius: 6,
+                pointBorderColor: '#000',
+                pointBackgroundColor: '#fcf9f4',
+                pointBorderWidth: 2.5,
+                showLine: true,
+                tension: 0.45,
+                fill: false,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            var xMap = {
+                                1: '极低压力',
+                                2: '较低压力',
+                                3: '中等偏低',
+                                4: '适中压力',
+                                5: '中等偏高',
+                                6: '较高压力',
+                                7: '极高压力'
+                            };
+                            var label = xMap[context.parsed.x] || context.parsed.x;
+                            return label + ' : 频率指数 ' + context.parsed.y.toFixed(1);
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    min: 0.5,
+                    max: 7.5,
+                    title: {
+                        display: true,
+                        text: '感知压力水平（由低到高）',
+                        color: '#1a1a1a',
+                        font: { weight: 'bold', size: 13, family: 'Courier New, monospace' }
+                    },
+                    ticks: {
+                        stepSize: 1,
+                        callback: function(value) {
+                            var labels = ['', '极低', '较低', '中等', '适中', '较高', '极高', ''];
+                            return labels[value] || '';
+                        },
+                        font: { size: 11, family: 'Courier New, monospace' },
+                        color: '#1a1a1a'
+                    },
+                    border: { color: '#000', width: 2 },
+                    grid: { color: '#d9d4cd', drawBorder: true, borderColor: '#000', borderWidth: 2 }
+                },
+                y: {
+                    min: 0,
+                    max: 5.8,
+                    title: {
+                        display: true,
+                        text: '行为发生概率（相对指数）',
+                        color: '#1a1a1a',
+                        font: { weight: 'bold', size: 13, family: 'Courier New, monospace' }
+                    },
+                    ticks: {
+                        stepSize: 1,
+                        font: { size: 11, family: 'Courier New, monospace' },
+                        color: '#1a1a1a'
+                    },
+                    border: { color: '#000', width: 2 },
+                    grid: { color: '#d9d4cd', drawBorder: true, borderColor: '#000', borderWidth: 2 }
+                }
+            },
+            elements: {
+                line: { borderColor: '#1a1a1a', borderWidth: 3 },
+                point: { hoverRadius: 8, hoverBorderWidth: 3 }
+            },
+            layout: {
+                padding: { top: 8, bottom: 4, left: 4, right: 8 }
+            }
+        }
+    });
+})();
+
+        // ============================================================
+        // 3. 给所有 .clickable 加上按下灰色反馈（通过 :active 已实现）
+        //    但为保险，用 JS 补一个 fallback
+        // ============================================================
+        document.querySelectorAll('.clickable').forEach(el => {
+            el.addEventListener('mousedown', function() {
+                this.style.transition = 'background 0.05s ease';
+                this.style.background = '#d4d4d4';
+            });
+            el.addEventListener('mouseup', function() {
+                this.style.background = '';
+            });
+            el.addEventListener('mouseleave', function() {
+                this.style.background = '';
+            });
+        });
+
+        // ============================================================
+        // 4. 控制台输出报告（额外展示）
+        // ============================================================
+        console.log('═══════════════════════════════════════════');
+        console.log('  📊 会考前夕打飞机概率统计报告');
+        console.log('═══════════════════════════════════════════');
+        console.log('  总参与人数 : ' + DATA.total + ' 人');
+        console.log('  会打飞机   : ' + DATA.counts[0] + ' 人 (' + DATA.percentages[0] + '%)');
+        console.log('  不会打飞机 : ' + DATA.counts[1] + ' 人 (' + DATA.percentages[1] + '%)');
+        console.log('  会考率     : ' + DATA.percentages[0] + '%');
+        console.log('───────────────────────────────────────────');
+        console.log('  详细回答：');
+        const reasons = [
+            '不会 - "没你照片"',
+            '不会 - "没打过"',
+            '会   - "我只指导昏在家不考了"',
+            '不会 - "打了飞机违法"',
+            '不会 - "自慰损智 sb吧"'
+        ];
+        reasons.forEach((r, i) => console.log('  #' + String(i + 1).padStart(2, '0') + '  ' + r));
+        console.log('───────────────────────────────────────────');
+        console.log('  ✅ 展示方式统计：');
+        console.log('  1. 统计摘要卡片 (4项指标)');
+        console.log('  2. 饼图 (Chart.js)');
+        console.log('  3. 柱状图 (Chart.js)');
+        console.log('  4. 详细数据列表');
+        console.log('  5. 水平进度条');
+        console.log('  6. 频数统计表 (含条形)');
+        console.log('  7. 控制台文本报告 (本输出)');
+        console.log('═══════════════════════════════════════════');
+    </script>
+
+</body>
+</html>
