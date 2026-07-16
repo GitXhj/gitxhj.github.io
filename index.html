@@ -37,13 +37,10 @@
         overflow-x: hidden;
         /* body 中不需要再写 font-family，因为 * 已经涵盖了 */
     }
-
-        html {
+html {
             scroll-behavior: smooth;
             touch-action: pan-x pan-y;
         }
-
-
 
         /* Liquid Glass SVG 滤镜定义 */
         .liquid-glass-filter {
@@ -60,23 +57,19 @@
         .liquid-glass {
             position: relative;
             background: rgba(255, 255, 255, 0.08);
-            /* Safari 回退：如果不支持复杂的SVG滤镜组合，使用高级原生模糊 */
             -webkit-backdrop-filter: blur(20px) saturate(180%) contrast(1.1) brightness(1.05);
-            /* 现代浏览器：叠加动态折射滤镜 */
             backdrop-filter: url(#liquid-glass-filter) blur(20px) saturate(180%) contrast(1.1) brightness(1.05);
             border-radius: 28px;
-            /* 边缘高光与阴影，模拟玻璃厚度 */
             border: 1px solid rgba(255, 255, 255, 0.12);
             box-shadow: 
-                0 10px 40px rgba(0, 0, 0, 0.25), /* 外部环境投影 */
-                inset 0 1px 1px rgba(255, 255, 255, 0.5), /* 顶部内高光 */
-                inset 0 -1px 1px rgba(0, 0, 0, 0.08),   /* 底部内阴影 */
-                inset 0 0 20px rgba(255, 255, 255, 0.05); /* 内部弥散光 */
-            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); /* 液态弹性回弹 */
+                0 10px 40px rgba(0, 0, 0, 0.25), 
+                inset 0 1px 1px rgba(255, 255, 255, 0.5), 
+                inset 0 -1px 1px rgba(0, 0, 0, 0.08),   
+                inset 0 0 20px rgba(255, 255, 255, 0.05); 
+            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); 
             overflow: hidden;
         }
 
-        /* 环境光高光层 */
         .liquid-glass::before {
             content: '';
             position: absolute;
@@ -93,13 +86,11 @@
             opacity: 1;
         }
 
-        /* 确保内容在玻璃层之上 */
         .liquid-glass > * {
             position: relative;
             z-index: 1;
         }
 
-        /* 亮色模式适配 */
         body.light-mode .liquid-glass {
             background: rgba(255, 255, 255, 0.55);
             border: 1px solid rgba(255, 255, 255, 0.8);
@@ -664,7 +655,7 @@
             gap: 10px;
             min-width: 280px;
             flex-shrink: 0;
-            border-radius: 20px; /* 内部卡片圆角略小 */
+            border-radius: 20px;
         }
 
         .post-item {
@@ -682,7 +673,7 @@
             transform: scale(0.98);
         }
 
-        .repo-header, .project-header {
+        .repo-header, .project-header, .note-header {
             display: flex;
             align-items: center;
             gap: 12px;
@@ -714,6 +705,13 @@
             gap: 15px;
             font-size: 0.85em;
             opacity: 0.8;
+        }
+
+        .note-image {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 10px;
         }
 
         .note-date, .post-date {
@@ -809,7 +807,7 @@
         .music-control {
             position: fixed;
             left: 20px;
-            bottom: 20px; /* 苹果风格常驻底部更优雅 */
+            bottom: 20px;
             z-index: 1000;
             transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
@@ -866,7 +864,7 @@
         }
 
         @media (min-width: 1024px) {
-            .container { max-width: 960px; } /* 苹果风格更偏爱窄一点的内容居中 */
+            .container { max-width: 960px; }
             .projects-container {
                 display: grid;
                 grid-template-columns: repeat(2, 1fr);
@@ -950,13 +948,43 @@
         
         <div class="sidebar-section sidebar-user-info">
             <img class="sidebar-avatar" id="sidebar-avatar" src="./Head-Furry/normal-dark.png" alt="头像">
-            <div class="sidebar-username" id="sidebar-username">Grodio</div>
+            <div class="sidebar-username" id="sidebar-username">Gordio</div>
             <div class="sidebar-bio" id="sidebar-bio">一只叫Grodio的Furry～热爱技术</div>
         </div>
 
         <div class="sidebar-section">
             <div class="section-title">GitHub 活动</div>
-            <div class="sidebar-timeline" id="github-timeline"></div>
+            <div class="sidebar-timeline" id="github-timeline"><div class="timeline-item">
+                        <div class="timeline-icon">●</div>
+                        <div class="timeline-content">
+                            <div class="timeline-action">推送到 GitXhj/gitxhj.github.io</div>
+                            <div class="timeline-time">28 分钟前</div>
+                        </div>
+                    </div><div class="timeline-item">
+                        <div class="timeline-icon">●</div>
+                        <div class="timeline-content">
+                            <div class="timeline-action">星标了 byoungd/up</div>
+                            <div class="timeline-time">1 周前</div>
+                        </div>
+                    </div><div class="timeline-item">
+                        <div class="timeline-icon">●</div>
+                        <div class="timeline-content">
+                            <div class="timeline-action">星标了 Sui-IB/InternalBeyond</div>
+                            <div class="timeline-time">2 周前</div>
+                        </div>
+                    </div><div class="timeline-item">
+                        <div class="timeline-icon">●</div>
+                        <div class="timeline-content">
+                            <div class="timeline-action">推送到 GitXhj/gitxhj.github.io</div>
+                            <div class="timeline-time">2 周前</div>
+                        </div>
+                    </div><div class="timeline-item">
+                        <div class="timeline-icon">●</div>
+                        <div class="timeline-content">
+                            <div class="timeline-action">推送到 GitXhj/gitxhj.github.io</div>
+                            <div class="timeline-time">2 周前</div>
+                        </div>
+                    </div></div>
         </div>
 
         <div class="sidebar-section">
@@ -1028,13 +1056,55 @@
             <!-- 最近文章 -->
             <div class="glass-card liquid-glass" style="width: 100%; max-width: 800px;">
                 <div class="section-title">最近文章</div>
-                <div class="posts-container" id="posts-container"></div>
+                <div class="posts-container" id="posts-container"><div class="post-item liquid-glass">
+                            <div class="post-title">看客！</div>
+                            <div class="post-date">2026/6/26</div>
+                        </div><div class="post-item liquid-glass">
+                            <div class="post-title">那剧烈的欢呼声，是为我们而欢呼吗？</div>
+                            <div class="post-date">2026/6/23</div>
+                        </div><div class="post-item liquid-glass">
+                            <div class="post-title">⚠️Warning：AI可能让你做出不可逆的决定！</div>
+                            <div class="post-date">2026/6/7</div>
+                        </div></div>
             </div>
 
             <!-- GitHub 仓库 -->
             <div class="glass-card liquid-glass" style="width: 100%; max-width: 800px;">
                 <div class="section-title">新 GitHub Star</div>
-                <div class="repos-container" id="repos-container"></div>
+                <div class="repos-container" id="repos-container"><a class="repo-card liquid-glass" href="https://github.com/byoungd/up" target="_blank" style="animation-delay: 0.4s;">
+                        <div class="repo-header">
+                            <svg class="repo-icon" viewBox="0 0 16 16" fill="currentColor">
+                                <path d="M2 2.5A2.5 2.5 0 014.5 0h8.75a.75.75 0 01.75.75v12.5a.75.75 0 01-.75.75h-2.5a.75.75 0 110-1.5h1.75v-2h-8a1 1 0 00-.714 1.7.75.75 0 01-1.072 1.05A2.495 2.495 0 012 11.5v-9zm10.5-1V9h-8c-.356 0-.694.074-1 .208V2.5a1 1 0 011-1h8zM5 12.25v3.25a.25.25 0 00.4.2l1.45-1.087a.25.25 0 01.3 0L8.6 15.7a.25.25 0 00.4-.2v-3.25a.25.25 0 00-.25-.25h-3.5a.25.25 0 00-.25.25z"></path>
+                            </svg>
+                            <div class="repo-name">up</div>
+                        </div>
+                        <div class="repo-description">An advanced guide which might benefit you a lot 🎉 . 人生进阶指南 离谱的人生 离谱的英语学习指南/英语学习教程/英语学习/学英语</div>
+                        <div class="repo-stats">
+                            <span>⭐ 55876</span>
+                        </div>
+                    </a><a class="repo-card liquid-glass" href="https://github.com/Sui-IB/InternalBeyond" target="_blank" style="animation-delay: 0.5s;">
+                        <div class="repo-header">
+                            <svg class="repo-icon" viewBox="0 0 16 16" fill="currentColor">
+                                <path d="M2 2.5A2.5 2.5 0 014.5 0h8.75a.75.75 0 01.75.75v12.5a.75.75 0 01-.75.75h-2.5a.75.75 0 110-1.5h1.75v-2h-8a1 1 0 00-.714 1.7.75.75 0 01-1.072 1.05A2.495 2.495 0 012 11.5v-9zm10.5-1V9h-8c-.356 0-.694.074-1 .208V2.5a1 1 0 011-1h8zM5 12.25v3.25a.25.25 0 00.4.2l1.45-1.087a.25.25 0 01.3 0L8.6 15.7a.25.25 0 00.4-.2v-3.25a.25.25 0 00-.25-.25h-3.5a.25.25 0 00-.25.25z"></path>
+                            </svg>
+                            <div class="repo-name">InternalBeyond</div>
+                        </div>
+                        <div class="repo-description">【Project-IB】边界之外：离线运行的单文件个人网站项目，旨于维系情感的连续性。A single-file offline personal website, built to sustain the continuity of feeling.</div>
+                        <div class="repo-stats">
+                            <span>⭐ 263</span>
+                        </div>
+                    </a><a class="repo-card liquid-glass" href="https://github.com/GustavoHerreroNunes/maps_routes" target="_blank" style="animation-delay: 0.6s;">
+                        <div class="repo-header">
+                            <svg class="repo-icon" viewBox="0 0 16 16" fill="currentColor">
+                                <path d="M2 2.5A2.5 2.5 0 014.5 0h8.75a.75.75 0 01.75.75v12.5a.75.75 0 01-.75.75h-2.5a.75.75 0 110-1.5h1.75v-2h-8a1 1 0 00-.714 1.7.75.75 0 01-1.072 1.05A2.495 2.495 0 012 11.5v-9zm10.5-1V9h-8c-.356 0-.694.074-1 .208V2.5a1 1 0 011-1h8zM5 12.25v3.25a.25.25 0 00.4.2l1.45-1.087a.25.25 0 01.3 0L8.6 15.7a.25.25 0 00.4-.2v-3.25a.25.25 0 00-.25-.25h-3.5a.25.25 0 00-.25.25z"></path>
+                            </svg>
+                            <div class="repo-name">maps_routes</div>
+                        </div>
+                        <div class="repo-description">📍A flutter mobile application to help users find the best route possible between an origin and a destination using the Google Maps API. </div>
+                        <div class="repo-stats">
+                            <span>⭐ 2</span>
+                        </div>
+                    </a></div>
             </div>
 
             <!-- 我的项目 -->
@@ -1055,13 +1125,34 @@
                         </div>
                         <div class="repo-description">Personal Developer</div>
                     </a>
+<a href="https://perdev.rth1.xyz/Aura" class="project-card liquid-glass" target="_blank">
+                        <div class="project-header">
+                            <img class="project-icon" src="./aura.png" alt="Aura">
+                            <div class="project-name">Aura</div>
+                        </div>
+                        <div class="repo-description">纯净浏览器起始页</div>
+                    </a>
+<a href="https://github.com/GitXhj/Nebula-Weather" class="project-card liquid-glass" target="_blank">
+                        <div class="project-header">
+                            <img class="project-icon" src="https://camo.githubusercontent.com/44c0a90899b3c427a8acea034d05fc469def495351c24b11288d6a5457ac5809/68747470733a2f2f7374617469632e636f64656d616f2e636e2f393735373736303238352f533167566c53786767672e6a7067" alt="Nebula-Weather">
+                            <div class="project-name">Nebula-Weather</div>
+                        </div>
+                        <div class="repo-description">开源OpenWeatherMap的网页天气应用</div>
+                    </a>
                 </div>
             </div>
 
             <!-- 随记 -->
             <div class="glass-card liquid-glass" style="width: 100%; max-width: 800px;">
                 <div class="section-title">最近随记</div>
-                <div class="notes-container" id="notes-container"></div>
+                <div class="notes-container" id="notes-container"><div class="note-card liquid-glass" style="animation-delay: 0.5s;">
+                        <div class="note-header">
+                            <div class="note-title">新网站上线！</div>
+                        </div>
+                        <div class="note-preview">留言看看...</div>
+                        
+                        <div class="note-date">2025-12-24</div>
+                    </div></div>
             </div>
 
             <!-- 评论区 -->
@@ -1083,7 +1174,7 @@
         <button class="modal-close" id="repos-modal-close">×</button>
         <div class="modal-content liquid-glass" id="all-repos-content">
             <div class="modal-title">全部 GitHub Stars</div>
-            <div class="all-items-list" id="all-repos-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 15px;"></div>
+            <div class="all-items-list" id="all-repos-list"></div>
         </div>
     </div>
 
@@ -1092,7 +1183,7 @@
         <button class="modal-close" id="notes-modal-close">×</button>
         <div class="modal-content liquid-glass" id="all-notes-content">
             <div class="modal-title">全部随记</div>
-            <div class="all-items-list" id="all-notes-list" style="display: flex; flex-direction: column; gap: 15px;"></div>
+            <div class="all-items-list" id="all-notes-list"></div>
         </div>
     </div>
 
@@ -1111,6 +1202,7 @@
         let clickTimer = null;
         let allRepos = [];
         let allNotes = [];
+        let isContentLoaded = false;
 
         // DOM 元素
         const loadingScreen = document.getElementById('loading-screen');
@@ -1133,7 +1225,7 @@
         const avatarContainer = document.getElementById('avatar-container');
         const nickname = document.getElementById('nickname');
 
-        // 液态玻璃效果动态折射贴图生成
+        // 液态玻璃效果
         class LiquidGlassEffect {
             constructor() {
                 this.canvas = document.createElement('canvas');
@@ -1206,7 +1298,7 @@
 
         const liquidGlass = new LiquidGlassEffect();
 
-        // 液态玻璃鼠标光效追踪 (环境光吸收)
+        // 环境光鼠标追踪
         document.addEventListener('mousemove', (e) => {
             const elements = document.querySelectorAll('.liquid-glass');
             elements.forEach(el => {
@@ -1226,12 +1318,23 @@
             const date = shanghaiTime.getDate();
             const hour = shanghaiTime.getHours();
             
-            if (month === 12 && date === 24 && hour >= 19) return './Head-Furry/ChristmasEve.png';
-            if (month === 12 && date === 25) return './Head-Furry/Christmas.png';
-            if (month === 10 && date === 30 && hour >= 19) return './Head-Furry/HalloweenEve.png';
-            if (month === 10 && date === 31) return './Head-Furry/Halloween.png';
-            if (hour >= 19 || hour < 7) return './Head-Furry/normal-dark.png';
-            return './Head-Furry/normal-light.png';
+            if (month === 12 && date === 24 && hour >= 19) {
+                return './Head-Furry/ChristmasEve.png';
+            }
+            if (month === 12 && date === 25) {
+                return './Head-Furry/Christmas.png';
+            }
+            if (month === 10 && date === 30 && hour >= 19) {
+                return './Head-Furry/HalloweenEve.png';
+            }
+            if (month === 10 && date === 31) {
+                return './Head-Furry/Halloween.png';
+            }
+            if (hour >= 19 || hour < 7) {
+                return './Head-Furry/normal-dark.png';
+            } else {
+                return './Head-Furry/normal-light.png';
+            }
         }
 
         // 应用主题
@@ -1245,6 +1348,7 @@
             }
         }
 
+        // 切换主题
         themeToggle.addEventListener('click', () => {
             isDarkMode = !isDarkMode;
             localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
@@ -1256,7 +1360,10 @@
             const iframe = document.querySelector('iframe.giscus-frame');
             if (iframe) {
                 const theme = isDarkMode ? 'dark' : 'light';
-                iframe.contentWindow.postMessage({ giscus: { setConfig: { theme } } }, 'https://giscus.app');
+                iframe.contentWindow.postMessage(
+                    { giscus: { setConfig: { theme } } },
+                    'https://giscus.app'
+                );
             }
         }
 
@@ -1278,16 +1385,19 @@
             document.getElementById('sidebar-username').textContent = userName;
         }
 
+        // 切换版本
         function toggleVersion() {
             useOldVersion = !useOldVersion;
             localStorage.setItem('useOldVersion', useOldVersion);
             updateAvatar();
         }
 
+        // 头像和昵称点击事件
         avatarContainer.addEventListener('click', toggleVersion);
         nickname.addEventListener('click', toggleVersion);
         document.getElementById('sidebar-avatar').addEventListener('click', toggleVersion);
 
+        // 首次访问提示
         if (isFirstVisit) {
             const hint = document.createElement('div');
             hint.className = 'version-switch-hint';
@@ -1314,6 +1424,7 @@
         // 时钟点击
         timeContainer.addEventListener('click', () => {
             clickCount++;
+            
             if (clickCount === 1) {
                 timeContainer.classList.add('enlarged');
                 clickTimer = setTimeout(() => {
@@ -1340,6 +1451,7 @@
                 hitokotoText = data.hitokoto;
                 document.querySelector('#hitokoto').textContent = hitokotoText;
             } catch (error) {
+                console.error('获取一言失败:', error);
                 hitokotoText = '生活不止眼前的苟且,还有诗和远方的田野。';
                 document.querySelector('#hitokoto').textContent = hitokotoText;
             }
@@ -1354,12 +1466,13 @@
                 document.getElementById('sidebar-bio').textContent = fullBio;
                 document.getElementById('bio-preview').textContent = fullBio.substring(0, 30) + '...';
             } catch (error) {
+                console.error('加载简介失败:', error);
                 document.getElementById('sidebar-bio').textContent = '暂无简介';
                 document.getElementById('bio-preview').textContent = '暂无简介';
             }
         }
 
-        // 加载 GitHub 仓库
+        // 加载 GitHub 仓库（仅显示前三个）
         async function loadGitHubRepos() {
             try {
                 const response = await fetch('https://api.github.com/users/Gitxhj/starred');
@@ -1367,21 +1480,26 @@
                 allRepos = repos;
                 const container = document.getElementById('repos-container');
                 container.innerHTML = '';
+                
                 const topRepos = repos.slice(0, 3);
                 topRepos.forEach((repo, index) => {
-                    container.appendChild(createRepoCard(repo, index));
+                    const card = createRepoCard(repo, index);
+                    container.appendChild(card);
                 });
             } catch (error) {
+                console.error('加载 GitHub 仓库失败:', error);
                 document.getElementById('repos-container').innerHTML = '<div class="error-message">无法加载 GitHub 仓库</div>';
             }
         }
 
+        // 创建仓库卡片
         function createRepoCard(repo, index) {
             const card = document.createElement('a');
             card.className = 'repo-card liquid-glass';
             card.href = repo.html_url;
             card.target = '_blank';
             card.style.animationDelay = `${0.4 + index * 0.1}s`;
+            
             card.innerHTML = `
                 <div class="repo-header">
                     <svg class="repo-icon" viewBox="0 0 16 16" fill="currentColor">
@@ -1390,18 +1508,25 @@
                     <div class="repo-name">${repo.name}</div>
                 </div>
                 <div class="repo-description">${repo.description || '无描述'}</div>
-                <div class="repo-stats"><span>⭐ ${repo.stargazers_count}</span></div>
+                <div class="repo-stats">
+                    <span>⭐ ${repo.stargazers_count}</span>
+                </div>
             `;
+            
             return card;
         }
 
+        // 显示全部仓库
         function showAllRepos() {
             const modal = document.getElementById('all-repos-modal');
             const list = document.getElementById('all-repos-list');
             list.innerHTML = '';
+            
             allRepos.forEach((repo, index) => {
-                list.appendChild(createRepoCard(repo, index));
+                const card = createRepoCard(repo, index);
+                list.appendChild(card);
             });
+            
             modal.classList.add('active');
         }
 
@@ -1420,6 +1545,7 @@
                 filteredEvents.forEach(event => {
                     const item = document.createElement('div');
                     item.className = 'timeline-item';
+                    
                     let action = '';
                     if (event.type === 'PushEvent') action = `推送到 ${event.repo.name}`;
                     else if (event.type === 'CreateEvent') action = `创建了 ${event.repo.name}`;
@@ -1427,23 +1553,31 @@
                     else if (event.type === 'WatchEvent') action = `星标了 ${event.repo.name}`;
                     
                     const timeAgo = getTimeAgo(new Date(event.created_at));
+                    
                     item.innerHTML = `
-                        <div class="timeline-icon"></div>
+                        <div class="timeline-icon">●</div>
                         <div class="timeline-content">
                             <div class="timeline-action">${action}</div>
                             <div class="timeline-time">${timeAgo}</div>
                         </div>
                     `;
+                    
                     timeline.appendChild(item);
                 });
             } catch (error) {
+                console.error('加载 GitHub 活动失败:', error);
                 document.getElementById('github-timeline').innerHTML = '<div class="error-message">无法加载活动</div>';
             }
         }
 
+        // 时间转换
         function getTimeAgo(date) {
             const seconds = Math.floor((new Date() - date) / 1000);
-            const intervals = { 年: 31536000, 月: 2592000, 周: 604800, 天: 86400, 小时: 3600, 分钟: 60 };
+            const intervals = {
+                年: 31536000, 月: 2592000, 周: 604800,
+                天: 86400, 小时: 3600, 分钟: 60
+            };
+            
             for (let [name, value] of Object.entries(intervals)) {
                 const interval = Math.floor(seconds / value);
                 if (interval >= 1) return `${interval} ${name}前`;
@@ -1459,38 +1593,51 @@
                 allNotes = data.notes;
                 const container = document.getElementById('notes-container');
                 container.innerHTML = '';
+                
                 if (allNotes.length > 0) {
-                    container.appendChild(createNoteCard(allNotes[0], 0));
+                    const card = createNoteCard(allNotes[0], 0);
+                    container.appendChild(card);
                 }
             } catch (error) {
+                console.error('加载随记失败:', error);
                 document.getElementById('notes-container').innerHTML = '<div class="error-message">无法加载随记</div>';
             }
         }
 
+        // 创建随记卡片
         function createNoteCard(note, index) {
             const card = document.createElement('div');
             card.className = 'note-card liquid-glass';
             card.style.animationDelay = `${0.5 + index * 0.1}s`;
+            
             card.innerHTML = `
-                <div class="note-header"><div class="note-title">${note.title}</div></div>
+                <div class="note-header">
+                    <div class="note-title">${note.title}</div>
+                </div>
                 <div class="note-preview">${note.content.substring(0, 50)}...</div>
-                ${note.imageUrl ? `<img class="note-image" src="${note.imageUrl}" alt="${note.title}" style="width:100%; max-height:200px; object-fit:cover; border-radius:16px;">` : ''}
+                ${note.imageUrl ? `<img class="note-image" src="${note.imageUrl}" alt="${note.title}">` : ''}
                 <div class="note-date">${note.date}</div>
             `;
+            
             card.addEventListener('click', () => showNoteModal(note));
             return card;
         }
 
+        // 显示全部随记
         function showAllNotes() {
             const modal = document.getElementById('all-notes-modal');
             const list = document.getElementById('all-notes-list');
             list.innerHTML = '';
+            
             allNotes.forEach((note, index) => {
-                list.appendChild(createNoteCard(note, index));
+                const card = createNoteCard(note, index);
+                list.appendChild(card);
             });
+            
             modal.classList.add('active');
         }
 
+        // 用户信息卡片自动移动到侧边栏
         function startUserInfoAnimation() {
             const userInfoContainer = document.getElementById('user-info-container');
             if (userInfoContainer) {
@@ -1507,28 +1654,38 @@
                 const posts = await response.json();
                 const container = document.getElementById('posts-container');
                 container.innerHTML = '';
+
                 const latestPosts = posts.slice(0, 3);
                 latestPosts.forEach(post => {
                     const item = document.createElement('div');
                     item.className = 'post-item liquid-glass';
+
                     const date = new Date(post.date);
                     const formattedDate = date.toLocaleDateString('zh-CN');
+
                     item.innerHTML = `
                         <div class="post-title">${post.title}</div>
                         <div class="post-date">${formattedDate}</div>
                     `;
+
                     item.addEventListener('click', () => {
                         window.location.href = post.path;
                     });
+
                     container.appendChild(item);
                 });
             } catch (error) {
-                document.getElementById('posts-container').innerHTML = '<div class="error-message">无法加载文章</div>';
+                console.error('加载文章失败:', error);
+                document.getElementById('posts-container').innerHTML =
+                    '<div class="error-message">无法加载文章</div>';
             }
         }
 
-        // 加载 Giscus 
+        // 加载 Giscus 评论系统
         function loadGiscus() {
+            // 如果已经加载过则不再重复加载
+            if (document.querySelector('iframe.giscus-frame')) return;
+            
             const script = document.createElement('script');
             script.src = 'https://giscus.app/client.js';
             script.setAttribute('data-repo', 'GitXhj/gitxhj.github.io');
@@ -1545,36 +1702,57 @@
             script.setAttribute('data-loading', 'lazy');
             script.crossOrigin = 'anonymous';
             script.async = true;
+
             document.getElementById('giscus-container').appendChild(script);
         }
 
+        // 显示随记模态框
         function showNoteModal(note) {
             const modal = document.getElementById('note-modal');
             const content = document.getElementById('modal-content');
+            
             content.innerHTML = `
                 <div class="modal-title">${note.title}</div>
                 ${note.imageUrl ? `<img class="modal-image" src="${note.imageUrl}" alt="${note.title}">` : ''}
                 <div class="modal-text">${note.content}</div>
                 <div class="modal-date">${note.date}</div>
             `;
+            
             modal.classList.add('active');
         }
 
-        document.getElementById('modal-close').addEventListener('click', () => document.getElementById('note-modal').classList.remove('active'));
+        // 关闭模态框事件
+        document.getElementById('modal-close').addEventListener('click', () => {
+            document.getElementById('note-modal').classList.remove('active');
+        });
+
         document.getElementById('note-modal').addEventListener('click', (e) => {
-            if (e.target.id === 'note-modal') document.getElementById('note-modal').classList.remove('active');
+            if (e.target.id === 'note-modal') {
+                document.getElementById('note-modal').classList.remove('active');
+            }
         });
 
-        document.getElementById('repos-modal-close').addEventListener('click', () => document.getElementById('all-repos-modal').classList.remove('active'));
+        document.getElementById('repos-modal-close').addEventListener('click', () => {
+            document.getElementById('all-repos-modal').classList.remove('active');
+        });
+
         document.getElementById('all-repos-modal').addEventListener('click', (e) => {
-            if (e.target.id === 'all-repos-modal') document.getElementById('all-repos-modal').classList.remove('active');
+            if (e.target.id === 'all-repos-modal') {
+                document.getElementById('all-repos-modal').classList.remove('active');
+            }
         });
 
-        document.getElementById('notes-modal-close').addEventListener('click', () => document.getElementById('all-notes-modal').classList.remove('active'));
+        document.getElementById('notes-modal-close').addEventListener('click', () => {
+            document.getElementById('all-notes-modal').classList.remove('active');
+        });
+
         document.getElementById('all-notes-modal').addEventListener('click', (e) => {
-            if (e.target.id === 'all-notes-modal') document.getElementById('all-notes-modal').classList.remove('active');
+            if (e.target.id === 'all-notes-modal') {
+                document.getElementById('all-notes-modal').classList.remove('active');
+            }
         });
 
+        // 侧边栏菜单点击事件
         document.getElementById('view-all-repos').addEventListener('click', () => {
             showAllRepos();
             sidebar.classList.remove('open');
@@ -1587,13 +1765,18 @@
             sidebarOverlay.classList.remove('active');
         });
 
+        // 更新时间
         function updateTime() {
             const now = new Date();
             const shanghaiTime = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Shanghai' }));
+            
             document.getElementById('current-time').textContent = shanghaiTime.toLocaleTimeString('zh-CN');
-            document.getElementById('current-date').textContent = shanghaiTime.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
+            document.getElementById('current-date').textContent = shanghaiTime.toLocaleDateString('zh-CN', {
+                year: 'numeric', month: 'long', day: 'numeric'
+            });
         }
 
+        // 音频控制
         function togglePlay() {
             if (isPlaying) {
                 backgroundMusic.pause();
@@ -1614,6 +1797,7 @@
         backgroundMusic.addEventListener('playing', updatePlayStatus);
         backgroundMusic.addEventListener('pause', updatePlayStatus);
 
+        // 音频控件折叠
         const musicControl = document.getElementById('music-control');
         let collapseTimeout;
 
@@ -1638,6 +1822,7 @@
 
         musicControl.addEventListener('mouseleave', startCollapseTimer);
 
+        // 打字效果
         function startTypingEffect() {
             if (isTypingHitokoto) {
                 if (charIndex < hitokotoText.length) {
@@ -1674,44 +1859,71 @@
             }
         }
 
+        // 滚动触发
         function setupScrollTrigger() {
             let touchStartY = 0;
-            document.addEventListener('touchstart', (e) => { touchStartY = e.touches[0].clientY; });
+            
+            document.addEventListener('touchstart', (e) => {
+                touchStartY = e.touches[0].clientY;
+            });
+            
             document.addEventListener('touchmove', (e) => {
                 if (!isIntroComplete) return;
                 const diff = touchStartY - e.touches[0].clientY;
                 if (diff > 50) showMainContent();
             });
+            
             document.addEventListener('wheel', (e) => {
                 if (!isIntroComplete) return;
                 if (e.deltaY > 0) showMainContent();
             });
+
             introScreen.addEventListener('click', () => {
                 if (isIntroComplete) showMainContent();
             });
         }
 
+        // 动态内容加载器（防止重复加载）
+        function loadDynamicContent() {
+            if (isContentLoaded) return;
+            isContentLoaded = true;
+            loadGitHubRepos();
+            loadGitHubActivity();
+            loadNotes();
+            loadGiscus();
+            startUserInfoAnimation();
+        }
+
+        // 显示主内容
         function showMainContent() {
             introScreen.style.opacity = '0';
             scrollIndicator.style.opacity = '0';
             headerBar.classList.remove('hidden');
+
             setTimeout(() => {
                 introScreen.style.display = 'none';
                 scrollIndicator.style.display = 'none';
                 mainContent.style.transform = 'translateY(0)';
                 localStorage.setItem('hasSeenIntro', 'true');
+
                 setTimeout(() => {
                     headerBar.classList.add('hidden');
                 }, 1000);
+
                 backgroundMusic.play().catch(() => {});
                 startCollapseTimer();
+                
+                // 修复首次访问不加载数据的问题
+                loadDynamicContent();
             }, 500);
         }
 
+        // 初始化
         window.addEventListener('load', async () => {
             loadPosts();
             updateAvatar();
             applyTheme();
+            
             await fetchHitokoto();
             await loadAbout();
             
@@ -1720,19 +1932,18 @@
                 setTimeout(() => {
                     loadingScreen.style.display = 'none';
                     headerBar.classList.remove('hidden');
+                    
                     if (localStorage.getItem('hasSeenIntro')) {
                         introScreen.style.display = 'none';
                         scrollIndicator.style.display = 'none';
                         mainContent.style.transform = 'translateY(0)';
                         isIntroComplete = true;
+                        
                         setTimeout(() => {
                             headerBar.classList.add('hidden');
                         }, 1000);
-                        loadGitHubRepos();
-                        loadGitHubActivity();
-                        loadNotes();
-                        startUserInfoAnimation();  
-                        loadGiscus(); 
+                        
+                        loadDynamicContent();
                     } else {
                         introScreen.style.opacity = '1';
                         startTypingEffect();
@@ -1741,6 +1952,7 @@
             }, 1000);
         });
 
+        // 定时器
         setInterval(updateTime, 1000);
         setInterval(() => {
             updateAvatar();
