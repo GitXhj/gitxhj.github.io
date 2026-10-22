@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>electricity-lab</title>
+<style>
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{
+    margin:0;padding:0;
+    height:100vh;height:100dvh;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    background:#FBF3E2;color:#4A3F35;
+    overscroll-behavior:none;
+    -webkit-font-smoothing:antialiased;
+  }
+  body{display:flex;flex-direction:column;}
+
+  /* ---------- 顶部 ---------- */
+  .hdr{
+    flex:0 0 auto;
+    display:flex;align-items:center;justify-content:space-between;
+    gap:10px;padding:10px 14px 6px;
+    flex-wrap:wrap;
+  }
+  .tabs{display:flex;background:#EFE3CC;border-radius:11px;padding:3px;}
+  .tabs button{
+    border:none;background:transparent;padding:7px 15px;border-radius:8px;
+    font-size:13px;font-weight:700;color:#A08E76;cursor:pointer;
+    font-family:inherit;transition:background .16s,color .16s;
+  }
+  .tabs button.active{background:#FFFDF7;color:#4A3F35;box-shadow:0 1px 4px rgba(120,95,60,.14);}
+
+  .volt{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:#A08E76;}
+  .volt input[type=range]{width:84px;}
+  .volt b{color:#3FA796;font-size:13px;min-width:34px;text-align:right;font-variant-numeric:tabular-nums;}
+
+  /* ---------- 画布 ---------- */
+  .stage{flex:1 1 auto;position:relative;min-height:0;}
+  canvas{position:absolute;top:0;left:0;display:block;}
+
+  /* ---------- 底部面板 ---------- */
+  .panel{
+    flex:0 0 auto;
+    background:#FFFDF7;
+    border-top:1px solid #F0E4CE;
+    border-radius:16px 16px 0 0;
+    padding:10px 14px calc(10px + env(safe-area-inset-bottom));
+    max-height:40vh;overflow-y:auto;
+    box-shadow:0 -2px 14px rgba(150,125,90,.07);
+  }
+  .prow{display:flex;align-items:center;gap:9px;padding:4px 0;}
+  .pname{
+    width:26px;font-size:12px;font-weight:800;color:#B5A186;flex:0 0 auto;
+  }
+  .prow input[type=range]{flex:1 1 auto;min-width:0;}
+  .pval{
+    width:48px;text-align:right;font-size:12px;font-weight:700;color:#4A3F35;
+    font-variant-numeric:tabular-nums;flex:0 0 auto;
+  }
+  .pdel{
+    flex:0 0 auto;width:25px;height:25px;border-radius:50%;border:none;
+    background:#F6EAD6;color:#BEA97F;font-size:15px;line-height:1;
+    cursor:pointer;font-family:inherit;transition:background .15s;
+  }
+  .pdel:active{background:#EDDCC0;}
+
+  .actions{display:flex;gap:9px;margin-top:9px;}
+  .btn{
+    flex:1;border:none;border-radius:11px;padding:11px 8px;
+    font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;
+    transition:opacity .15s,transform .08s;
+  }
+  .btn:active{transform:scale(.97);}
+  .btn-primary{background:#F26B4E;color:#fff;}
+  .btn-primary:disabled{background:#EBDCC4;color:#BCA98C;}
+  .btn-ghost{background:#F6EAD6;color:#9E8B71;}
+
+  /* ---------- 滑块 ---------- */
+  input[type=range]{
+    -webkit-appearance:none;appearance:none;
+    height:5px;border-radius:3px;background:#EEDFC6;outline:none;margin:0;
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;appearance:none;
+    width:17px;height:17px;border-radius:50%;
+    background:#F26B4E;border:2.5px solid #FFFDF7;
+    box-shadow:0 1px 4px rgba(140,100,60,.25);cursor:pointer;
+  }
+  input[type=range]::-moz-range-thumb{
+    width:15px;height:15px;border-radius:50%;
+    background:#F26B4E;border:2.5px solid #FFFDF7;
+    box-shadow:0 1px 4px rgba(140,100,60,.25);cursor:pointer;
+  }
+  .volt input[type=range]{background:#E3EDE8;}
+  .volt input[type=range]::-webkit-slider-thumb{background:#3FA796;}
+  .volt input[type=range]::-moz-range-thumb{background:#3FA796;}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="tabs">
+    <button id="tabSeries" class="active">串联</button>
+    <button id="tabParallel">并联</button>
+  </div>
+  <div class="volt">
+    <span>电压</span>
+    <input id="voltRange" type="range" min="1" max="24" step="1" value="12">
+    <b id="voltVal">12V</b>
+  </div>
+</div>
+
+<div class="stage"><canvas id="cv"></canvas></div>
+
+<div class="panel">
+  <div id="plist"></div>
+  <div class="actions">
+    <button id="addBtn" class="btn btn-primary">＋ 添加电阻</button>
+    <button id="resetBtn" class="btn btn-ghost">重置</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+
+  /* =========================================================
+     常量 & 状态
+  ========================================================= */
+  const BG        = '#FBF3E2';
+  const C_WIRE    = '#CBB99C';
+  const C_DOT     = '#F26B4E';
+  const C_RES     = '#5B8DEF';
+  const C_BAT     = '#3FA796';
+  const C_TEXT    = '#4A3F35';
+  const C_SUB     = '#A08E76';
+
+  const MAX_RES   = 4;      // 最多 4 个电阻 / 4 条支路
+  const MIN_R     = 1;
+  const MAX_R     = 100;
+
+  const state = {
+    mode: 'series',
+    voltage: 12,
+    series:   [10, 10],
+    parallel: [10, 20]
+  };
+
+  const cv  = document.getElementById('cv');
+  const ctx = cv.getContext('2d');
+
+  let W = 320, H = 320, DPR = 1;
+  let geo = {};
+  let model = null;
+
+  /* =========================================================
+     工具函数
+  ========================================================= */
+  function clamp(v,a,b){ return v<a?a:(v>b?b:v); }
+
+  function fmtI(v){
+    if(v < 0.005) return '0.00 A';
+    if(v < 1)     return v.toFixed(2) + ' A';
+    if(v < 100)   return v.toFixed(1) + ' A';
+    return v.toFixed(0) + ' A';
+  }
+  function fmtV(v){
+    return (v < 10 ? v.toFixed(1) : v.toFixed(0)) + 'V';
+  }
+
+  function rrect(x,y,w,h,r){
+    r = Math.min(r, w/2, h/2);
+    ctx.beginPath();
+    ctx.moveTo(x+r,y);
+    ctx.arcTo(x+w,y,x+w,y+h,r);
+    ctx.arcTo(x+w,y+h,x,y+h,r);
+    ctx.arcTo(x,y+h,x,y,r);
+    ctx.arcTo(x,y,x+w,y,r);
+    ctx.closePath();
+  }
+
+  /* ---- 电流 → 视觉速度（平方根压缩，保证大小电流都能看清） ---- */
+  function speedFor(I){
+    const v = 120 * Math.sqrt(Math.max(0, I));
+    return Math.min(v, 420);
+  }
+
+  /* =========================================================
+     路径段（点沿着它流动）
+  ========================================================= */
+  function makeSeg(pts, current){
+    let len = 0;
+    for(let i=1;i<pts.length;i++){
+      len += Math.hypot(pts[i][0]-pts[i-1][0], pts[i][1]-pts[i-1][1]);
+    }
+    return { pts, len, current, phase: 0 };
+  }
+
+  function pointAt(seg, s){
+    const L = seg.len;
+    if(L <= 0) return seg.pts[0];
+    s = ((s % L) + L) % L;
+    for(let i=1;i<seg.pts.length;i++){
+      const p0 = seg.pts[i-1], p1 = seg.pts[i];
+      const d = Math.hypot(p1[0]-p0[0], p1[1]-p0[1]);
+      if(s <= d || i === seg.pts.length-1){
+        const t = d > 0 ? s/d : 0;
+        return [p0[0] + (p1[0]-p0[0])*t, p0[1] + (p1[1]-p0[1])*t];
+      }
+      s -= d;
+    }
+    return seg.pts[seg.pts.length-1];
+  }
+
+  /* =========================================================
+     几何布局
+  ========================================================= */
+  function computeGeo(){
+    const padX = 40;
+    const topM = Math.max(48, H * 0.13);
+    const botM = Math.max(94, H * 0.21);
+
+    if(state.mode === 'series'){
+      geo = {
+        x1: padX,
+        x2: W - padX,
+        y1: topM,
+        y2: H - botM
+      };
+    } else {
+      geo = {
+        xL: padX,
+        xR: W - padX,
+        yT: topM,
+        yB: H - botM
+      };
+    }
+  }
+
+  /* =========================================================
+     构建：串联
+     A(左上) → B(右上) → C(右下) → D(左下) → A   顺时针
+     电池在底边（C→D 方向，即电池内部电流从右向左，正极在左）
+  ========================================================= */
+  function buildSeries(){
+    const { x1, x2, y1, y2 } = geo;
+    const Rs = state.series;
+    const n  = Rs.length;
+    const V  = state.voltage;
+
+    const Rtot = Rs.reduce((a,b)=>a+b, 0) || 0.0001;
+    const I    = V / Rtot;
+
+    const A = [x1,y1], B = [x2,y1], C = [x2,y2], D = [x1,y2];
+
+    const wires = [ [A,B], [B,C], [C,D], [D,A] ];
+    const elements = [];
+    const segments = [];
+
+    // 整条回路是一个闭合路径，电流处处相等
+    segments.push(makeSeg([A,B,C,D,A], I));
+
+    // ---- 顶部导线上的电阻 ----
+    const mx    = Math.min(46, (x2-x1) * 0.15);
+    const avail = (x2-x1) - 2*mx;
+    const step  = avail / n;
+    const resW  = clamp(step * 0.74, 26, 54);
+    const resH  = 22;
+
+    for(let i=0;i<n;i++){
+      const cx = x1 + mx + step * (i + 0.5);
+      elements.push({
+        type:'resistor',
+        x: cx, y: y1, w: resW, h: resH,
+        name: 'R' + (i+1),
+        R: Rs[i],
+        Vdrop: I * Rs[i],
+        showI: false
+      });
+    }
+
+    // ---- 底部电池 ----
+    elements.push({
+      type:'battery',
+      x: (x1+x2)/2, y: y2,
+      V: V,
+      positiveSide: -1,          // 正极在左
+      label: 'U = ' + fmtV(V)
+    });
+
+    return { wires, elements, segments, I, V, Rtot, mode:'series' };
+  }
+
+  /* =========================================================
+     构建：并联
+     左右两根竖直导轨；底部电池；N 条水平支路（各带一个电阻）
+     电流：电池右极 → 右导轨上行 → 各支路向左 → 左导轨下行 → 电池
+  ========================================================= */
+  function buildParallel(){
+    const { xL, xR, yT, yB } = geo;
+    const Rs = state.parallel;
+    const n  = Rs.length;
+    const V  = state.voltage;
+
+    const Is   = Rs.map(r => V / Math.max(r, 0.0001));
+    const Itot = Is.reduce((a,b)=>a+b, 0);
+
+    // ---- 支路纵坐标 ----
+    const botSpace = 66;
+    const availTop = yT;
+    const availBot = yB - botSpace;
+    const gap = Math.max(1, (availBot - availTop) / n);
+    const ys = [];
+    for(let i=0;i<n;i++) ys.push(availTop + gap * (i + 0.5));
+
+    const wires = [];
+    const elements = [];
+    const segments = [];
+
+    // 左右导轨
+    wires.push([[xL, ys[0]], [xL, yB]]);
+    wires.push([[xR, ys[0]], [xR, yB]]);
+    // 底部导线（电池所在）
+    wires.push([[xL, yB], [xR, yB]]);
+
+    // ---- 各支路 ----
+    const resW = clamp((xR-xL) * 0.42, 26, 56);
+    const resH = 22;
+
+    for(let i=0;i<n;i++){
+      wires.push([[xL, ys[i]], [xR, ys[i]]]);
+      // 点从右往左流
+      segments.push(makeSeg([[xR, ys[i]], [xL, ys[i]]], Is[i]));
+
+      elements.push({
+        type:'resistor',
+        x: (xL+xR)/2, y: ys[i],
+        w: resW, h: resH,
+        name: 'R' + (i+1),
+        R: Rs[i],
+        Vdrop: V,
+        showI: true,
+        current: Is[i]
+      });
+    }
+
+    // ---- 右导轨（点向上流）----
+    segments.push(makeSeg([[xR, yB], [xR, ys[n-1]]], Itot));
+    for(let j=n-1; j>=1; j--){
+      let cur = 0;
+      for(let k=0;k<=j-1;k++) cur += Is[k];
+      segments.push(makeSeg([[xR, ys[j]], [xR, ys[j-1]]], cur));
+    }
+
+    // ---- 左导轨（点向下流）----
+    for(let j=0; j<n-1; j++){
+      let cur = 0;
+      for(let k=0;k<=j;k++) cur += Is[k];
+      segments.push(makeSeg([[xL, ys[j]], [xL, ys[j+1]]], cur));
+    }
+    segments.push(makeSeg([[xL, ys[n-1]], [xL, yB]], Itot));
+
+    // ---- 底部导线（电池两侧）----
+    const bx = (xL+xR)/2;
+    const bw = 14;
+    segments.push(makeSeg([[xL, yB], [bx-bw, yB]], Itot));
+    segments.push(makeSeg([[bx+bw, yB], [xR, yB]], Itot));
+
+    // ---- 电池 ----
+    elements.push({
+      type:'battery',
+      x: bx, y: yB,
+      V: V,
+      positiveSide: 1,           // 正极在右
+      label: 'U = ' + fmtV(V)
+    });
+
+    return { wires, elements, segments, Is, Itot, V, mode:'parallel' };
+  }
+
+  /* =========================================================
+     重建
+  ========================================================= */
+  function rebuild(){
+    computeGeo();
+
+    const oldPhases = model ? model.segments.map(s => s.phase) : [];
+
+    model = (state.mode === 'series') ? buildSeries() : buildParallel();
+
+    model.segments.forEach((s,i)=>{
+      if(oldPhases[i] != null && s.len > 0){
+        s.phase = oldPhases[i] % s.len;
+      }
+    });
+  }
+
+  /* =========================================================
+     尺寸
+  ========================================================= */
+  function resizeCanvas(){
+    const parent = cv.parentElement;
+    const r = parent.getBoundingClientRect();
+    W = Math.max(220, Math.round(r.width));
+    H = Math.max(200, Math.round(r.height));
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+
+    cv.width  = Math.round(W * DPR);
+    cv.height = Math.round(H * DPR);
+    cv.style.width  = W + 'px';
+    cv.style.height = H + 'px';
+
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    rebuild();
+  }
+
+  /* =========================================================
+     绘制：导线
+  ========================================================= */
+  function drawWires(){
+    ctx.lineCap  = 'round';
+    ctx.lineJoin = 'round';
+    ctx.lineWidth = 7;
+    ctx.strokeStyle = C_WIRE;
+
+    for(const w of model.wires){
+      ctx.beginPath();
+      ctx.moveTo(w[0][0], w[0][1]);
+      ctx.lineTo(w[1][0], w[1][1]);
+      ctx.stroke();
+    }
+  }
+
+  /* =========================================================
+     绘制：电流点
+  ========================================================= */
+  function drawDots(dt){
+    ctx.fillStyle = C_DOT;
+
+    for(const seg of model.segments){
+      if(seg.len < 1) continue;
+
+      const v = speedFor(seg.current);
+      if(v > 0){
+        seg.phase = (seg.phase + v * dt) % seg.len;
+      }
+
+      const count   = Math.max(1, Math.round(seg.len / 26));
+      const spacing = seg.len / count;
+
+      for(let k=0;k<count;k++){
+        const p = pointAt(seg, seg.phase + k * spacing);
+        ctx.beginPath();
+        ctx.arc(p[0], p[1], 3.3, 0, Math.PI*2);
+        ctx.fill();
+      }
+    }
+  }
+
+  /* =========================================================
+     绘制：电阻
+  ========================================================= */
+  function drawResistor(el){
+    const { x, y, w, h } = el;
+
+    // 白色块遮住导线和点
+    rrect(x - w/2, y - h/2, w, h, 7);
+    ctx.fillStyle = '#FFFDF7';
+    ctx.fill();
+    ctx.lineWidth = 2.4;
+    ctx.strokeStyle = C_RES;
+    ctx.stroke();
+
+    // 标签
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    const line1 = el.name + ' ' + el.R + 'Ω';
+    const line2 = el.showI
+      ? 'I=' + fmtI(el.current)
+      : 'U=' + fmtV(el.Vdrop);
+
+    ctx.font = '700 10.5px -apple-system,system-ui,"PingFang SC",sans-serif';
+    ctx.fillStyle = C_RES;
+    ctx.fillText(line1, x, y + h/2 + 12);
+
+    ctx.font = '600 10px -apple-system,system-ui,"PingFang SC",sans-serif';
+    ctx.fillStyle = el.showI ? C_DOT : C_SUB;
+    ctx.fillText(line2, x, y + h/2 + 25);
+  }
+
+  /* =========================================================
+     绘制：电池
+  ========================================================= */
+  function drawBattery(el){
+    const { x, y, V, positiveSide } = el;
+    const ps = positiveSide;   // -1 左正 / +1 右正
+
+    // 擦掉底下的导线与点
+    ctx.fillStyle = BG;
+    ctx.fillRect(x - 13, y - 24, 26, 48);
+
+    // 重画两极外侧的导线
+    const xPos = x + ps * 5.5;
+    const xNeg = x - ps * 5.5;
+
+    ctx.strokeStyle = C_WIRE;
+    ctx.lineWidth = 7;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(x - 13, y); ctx.lineTo(xPos, y);
+    ctx.moveTo(xNeg, y);   ctx.lineTo(x + 13, y);
+    ctx.stroke();
+
+    // 极板
+    ctx.strokeStyle = C_BAT;
+    ctx.lineWidth = 3.6;
+    ctx.beginPath();
+    ctx.moveTo(xPos, y - 14); ctx.lineTo(xPos, y + 14);   // 长板 = 正极
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(xNeg, y - 7);  ctx.lineTo(xNeg, y + 7);    // 短板 = 负极
+    ctx.stroke();
+
+    // ---- 电压"推力"箭头（长度 ∝ 电压）----
+    const ay  = y - 30;
+    const len = 12 + (V / 24) * 46;
+
+    ctx.strokeStyle = C_BAT;
+    ctx.fillStyle   = C_BAT;
+    ctx.lineWidth   = 2.6;
+    ctx.lineCap     = 'round';
+
+    const x0 = x - ps * len/2;
+    const x1 = x + ps * len/2;
+
+    ctx.beginPath();
+    ctx.moveTo(x0, ay);
+    ctx.lineTo(x1, ay);
+    ctx.stroke();
+
+    // 箭头头部（指向正极方向 = ps）
+    const ah = 5.5;
+    ctx.beginPath();
+    ctx.moveTo(x1, ay);
+    ctx.lineTo(x1 - ps * ah, ay - ah);
+    ctx.lineTo(x1 - ps * ah, ay + ah);
+    ctx.closePath();
+    ctx.fill();
+
+    // 电压文字
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.font = '700 11px -apple-system,system-ui,"PingFang SC",sans-serif';
+    ctx.fillStyle = C_BAT;
+    ctx.fillText(el.label, x, y + 32);
+  }
+
+  /* =========================================================
+     绘制：总电流等注记
+  ========================================================= */
+  function drawAnnotations(){
+    if(model.mode === 'series'){
+      const { x1, x2, y1, y2 } = geo;
+      const cx = (x1+x2)/2;
+      const cy = (y1+y2)/2 - 8;
+
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      ctx.font = '800 22px -apple-system,system-ui,"PingFang SC",sans-serif';
+      ctx.fillStyle = C_DOT;
+      ctx.fillText('I = ' + fmtI(model.I), cx, cy);
+
+      ctx.font = '600 11.5px -apple-system,system-ui,"PingFang SC",sans-serif';
+      ctx.fillStyle = C_SUB;
+      ctx.fillText('R总 = ' + model.Rtot.toFixed(0) + 'Ω', cx, cy + 24);
+    } else {
+      // 并联：把各支路电流画在支路右侧之外？这里画在顶部提示
+      const { xL, xR, yT } = geo;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.font = '700 11.5px -apple-system,system-ui,"PingFang SC",sans-serif';
+      ctx.fillStyle = C_DOT;
+      ctx.fillText('总电流 I = ' + fmtI(model.Itot), (xL+xR)/2, yT - 22);
+    }
+  }
+
+  /* =========================================================
+     主渲染
+  ========================================================= */
+  function render(dt){
+    ctx.setTransform(DPR,0,0,DPR,0,0);
+    ctx.clearRect(0,0,W,H);
+    ctx.fillStyle = BG;
+    ctx.fillRect(0,0,W,H);
+
+    // 1. 导线
+    drawWires();
+
+    // 2. 电流点（在元件下方）
+    drawDots(dt);
+
+    // 3. 元件
+    for(const el of model.elements){
+      if(el.type === 'resistor') drawResistor(el);
+      else drawBattery(el);
+    }
+
+    // 4. 注记
+    drawAnnotations();
+  }
+
+  /* =========================================================
+     动画循环
+  ========================================================= */
+  let lastT = performance.now();
+  function loop(now){
+    let dt = (now - lastT) / 1000;
+    lastT = now;
+    dt = Math.min(dt, 0.05);          // 防止切标签页后大跳
+    if(model) render(dt);
+    requestAnimationFrame(loop);
+  }
+
+  /* =========================================================
+     UI —— 电阻列表
+  ========================================================= */
+  const plist  = document.getElementById('plist');
+  const addBtn = document.getElementById('addBtn');
+
+  function currentArr(){
+    return state.mode === 'series' ? state.series : state.parallel;
+  }
+
+  function renderPanel(){
+    const arr = currentArr();
+    plist.innerHTML = '';
+
+    arr.forEach((R, i) => {
+      const row = document.createElement('div');
+      row.className = 'prow';
+
+      const name = document.createElement('span');
+      name.className = 'pname';
+      name.textContent = 'R' + (i+1);
+
+      const slider = document.createElement('input');
+      slider.type = 'range';
+      slider.min = MIN_R;
+      slider.max = MAX_R;
+      slider.step = 1;
+      slider.value = R;
+
+      const val = document.createElement('span');
+      val.className = 'pval';
+      val.textContent = R + 'Ω';
+
+      const del = document.createElement('button');
+      del.className = 'pdel';
+      del.textContent = '×';
+      del.disabled = arr.length <= 1;
+      if(arr.length <= 1){ del.style.opacity = '0.35'; del.style.cursor = 'default'; }
+
+      slider.addEventListener('input', e => {
+        const v = parseInt(e.target.value, 10);
+        const list = currentArr();
+        list[i] = v;
+        val.textContent = v + 'Ω';
+        rebuild();
+      });
+
+      del.addEventListener('click', () => {
+        const list = currentArr();
+        if(list.length <= 1) return;
+        list.splice(i, 1);
+        renderPanel();
+        rebuild();
+      });
+
+      row.appendChild(name);
+      row.appendChild(slider);
+      row.appendChild(val);
+      row.appendChild(del);
+      plist.appendChild(row);
+    });
+
+    addBtn.disabled = arr.length >= MAX_RES;
+    addBtn.textContent = state.mode === 'series'
+      ? (arr.length >= MAX_RES ? '已达上限（4 个）' : '＋ 添加电阻')
+      : (arr.length >= MAX_RES ? '已达上限（4 条）' : '＋ 添加支路');
+  }
+
+  const tabSeries   = document.getElementById('tabSeries');
+  const tabParallel = document.getElementById('tabParallel');
+  const voltRange   = document.getElementById('voltRange');
+  const voltVal     = document.getElementById('voltVal');
+  const resetBtn    = document.getElementById('resetBtn');
+
+  function setMode(mode){
+    if(state.mode === mode) return;
+    state.mode = mode;
+    tabSeries.classList.toggle('active', mode === 'series');
+    tabParallel.classList.toggle('active', mode === 'parallel');
+    model = null;              // 切换模式时不做相位继承
+    renderPanel();
+    rebuild();
+  }
+
+  tabSeries.addEventListener('click', () => setMode('series'));
+  tabParallel.addEventListener('click', () => setMode('parallel'));
+
+  voltRange.addEventListener('input', e => {
+    state.voltage = parseInt(e.target.value, 10);
+    voltVal.textContent = state.voltage + 'V';
+    rebuild();
+  });
+
+  addBtn.addEventListener('click', () => {
+    const list = currentArr();
+    if(list.length >= MAX_RES) return;
+    list.push(10);
+    renderPanel();
+    rebuild();
+  });
+
+  resetBtn.addEventListener('click', () => {
+    state.voltage = 12;
+    state.series   = [10, 10];
+    state.parallel = [10, 20];
+    voltRange.value = 12;
+    voltVal.textContent = '12V';
+    model = null;
+    renderPanel();
+    rebuild();
+  });
+
+  /* =========================================================
+     启动
+  ========================================================= */
+  function boot(){
+    renderPanel();
+    resizeCanvas();
+
+    if('ResizeObserver' in window){
+      const ro = new ResizeObserver(() => resizeCanvas());
+      ro.observe(cv.parentElement);
+    } else {
+      window.addEventListener('resize', resizeCanvas);
+    }
+    window.addEventListener('orientationchange', () => setTimeout(resizeCanvas, 120));
+
+    lastT = performance.now();
+    requestAnimationFrame(loop);
+  }
+
+  boot();
+
+})();
+</script>
+</body>
+</html>
