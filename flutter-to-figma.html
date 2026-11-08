@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flutter → Figma 迁移地图</title>
+<style>
+  :root {
+    --bg: #fafafa;
+    --ink: #111111;
+    --muted: #6b6b6b;
+    --line: #111111;
+    --grid: #e6e6e6;
+    --accent: #2b59ff;      /* Flutter blue */
+    --accent2: #ff2b2b;     /* Figma red */
+    --surface: #ffffff;
+    --code-bg: #f0f0f0;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; border-radius: 0 !important; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+                 "Noto Sans SC", "Microsoft YaHei", sans-serif;
+    background: var(--bg);
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 32px 32px;
+    color: var(--ink);
+    line-height: 1.7;
+  }
+
+  /* ---------- Hero ---------- */
+  .hero {
+    border-bottom: 2px solid var(--line);
+    padding: 96px 24px 72px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-inner { max-width: 1080px; margin: 0 auto; position: relative; z-index: 2; }
+  .hero .tag {
+    display: inline-block;
+    border: 2px solid var(--ink);
+    padding: 4px 14px;
+    font-size: 13px;
+    letter-spacing: 0.15em;
+    font-weight: 600;
+    background: var(--surface);
+    margin-bottom: 28px;
+  }
+  .hero h1 {
+    font-size: clamp(34px, 6vw, 64px);
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    max-width: 720px;
+  }
+  .hero h1 .arrow { color: var(--accent); }
+  .hero p.sub {
+    margin-top: 20px;
+    max-width: 640px;
+    color: var(--muted);
+    font-size: 17px;
+  }
+  /* 几何装饰 */
+  .deco-circle {
+    position: absolute;
+    width: 260px; height: 260px;
+    border: 2px solid var(--ink);
+    border-radius: 50%;
+    right: -60px; top: 40px;
+    opacity: 0.12;
+  }
+  .deco-square {
+    position: absolute;
+    width: 120px; height: 120px;
+    background: var(--accent);
+    right: 140px; bottom: -40px;
+    opacity: 0.15;
+    transform: rotate(45deg);
+  }
+
+  /* ---------- 通用布局 ---------- */
+  section { max-width: 1080px; margin: 0 auto; padding: 72px 24px; }
+  .sec-head { display: flex; align-items: baseline; gap: 16px; margin-bottom: 40px; flex-wrap: wrap; }
+  .sec-num {
+    font-family: "SF Mono", Consolas, monospace;
+    font-size: 14px;
+    font-weight: 700;
+    border: 2px solid var(--ink);
+    background: var(--ink);
+    color: var(--bg);
+    padding: 2px 10px;
+  }
+  .sec-head h2 { font-size: clamp(24px, 4vw, 34px); font-weight: 800; letter-spacing: -0.01em; }
+
+  /* ---------- 映射表 ---------- */
+  .table-wrap {
+    border: 2px solid var(--line);
+    background: var(--surface);
+    overflow-x: auto;
+    box-shadow: 8px 8px 0 var(--ink);
+  }
+  table { width: 100%; border-collapse: collapse; min-width: 720px; }
+  thead th {
+    text-align: left;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 14px 18px;
+    background: var(--ink);
+    color: var(--bg);
+    border-right: 1px solid #444;
+  }
+  thead th:last-child { border-right: none; }
+  tbody td {
+    padding: 13px 18px;
+    font-size: 14.5px;
+    border-top: 1px solid var(--grid);
+    border-right: 1px solid var(--grid);
+    vertical-align: top;
+  }
+  tbody td:last-child { border-right: none; }
+  tbody tr:hover { background: #f4f6ff; }
+  td .fl { font-family: "SF Mono", Consolas, monospace; font-size: 13px; color: var(--accent); font-weight: 600; }
+  td .fg { font-weight: 700; }
+  td .note { color: var(--muted); font-size: 13px; }
+  /* 分类行 */
+  tr.group td {
+    background: var(--code-bg);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    padding: 8px 18px;
+    color: var(--muted);
+    border-top: 2px solid var(--ink);
+  }
+
+  /* ---------- 概念卡片 ---------- */
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 0;
+    border: 2px solid var(--line);
+    box-shadow: 8px 8px 0 var(--ink);
+    background: var(--surface);
+  }
+  .card {
+    padding: 28px 24px;
+    border-top: 1px solid var(--grid);
+    position: relative;
+  }
+  .card:nth-child(n+2) { border-left: 1px solid var(--grid); }
+  @media (max-width: 700px) {
+    .card:nth-child(n+2) { border-left: none; }
+  }
+  .card .idx {
+    position: absolute;
+    top: 24px; right: 24px;
+    font-family: "SF Mono", Consolas, monospace;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .card .glyph {
+    width: 44px; height: 44px;
+    border: 2px solid var(--ink);
+    margin-bottom: 18px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .card .glyph.g1 { background: var(--accent); }
+  .card .glyph.g2 { background: var(--accent2); }
+  .card .glyph.g3 { background: var(--surface); }
+  .card .glyph.g4 { background: var(--ink); }
+  .card .glyph.g5 { background: var(--surface); border-style: dashed; }
+  .card .glyph.g6 { background: repeating-linear-gradient(45deg, var(--accent) 0 4px, transparent 4px 8px); }
+  .card h3 { font-size: 17px; font-weight: 800; margin-bottom: 4px; }
+  .card .en {
+    font-family: "SF Mono", Consolas, monospace;
+    font-size: 12px;
+    color: var(--muted);
+    display: block;
+    margin-bottom: 12px;
+  }
+  .card p { font-size: 14px; color: #333; }
+  .card p + p { margin-top: 8px; }
+  .card .analogy {
+    margin-top: 14px;
+    padding: 10px 12px;
+    background: var(--code-bg);
+    border-left: 3px solid var(--accent);
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  /* ---------- 路径 / 步骤 ---------- */
+  .steps { counter-reset: step; }
+  .step {
+    display: flex;
+    gap: 24px;
+    padding: 28px 0;
+    border-top: 2px solid var(--ink);
+  }
+  .step:last-child { border-bottom: 2px solid var(--ink); }
+  .step .n {
+    counter-increment: step;
+    flex: 0 0 56px; height: 56px;
+    border: 2px solid var(--ink);
+    background: var(--surface);
+    display: flex; align-items: center; justify-content: center;
+    font-family: "SF Mono", Consolas, monospace;
+    font-weight: 700;
+    font-size: 20px;
+  }
+  .step .n::before { content: "0" counter(step); }
+  .step h3 { font-size: 17px; font-weight: 800; margin-bottom: 6px; }
+  .step p { font-size: 14.5px; color: #333; max-width: 760px; }
+  .step .mono {
+    font-family: "SF Mono", Consolas, monospace;
+    font-size: 13px;
+    background: var(--code-bg);
+    padding: 2px 6px;
+  }
+
+  /* ---------- 陷阱清单 ---------- */
+  .pitfalls {
+    border: 2px solid var(--accent2);
+    background: var(--surface);
+    box-shadow: 8px 8px 0 var(--accent2);
+  }
+  .pitfall {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    padding: 18px 24px;
+    border-top: 1px solid var(--grid);
+  }
+  .pitfall:first-child { border-top: none; }
+  .pitfall .x {
+    flex: 0 0 24px; height: 24px;
+    background: var(--accent2);
+    color: #fff;
+    font-weight: 800;
+    font-size: 13px;
+    display: flex; align-items: center; justify-content: center;
+    margin-top: 3px;
+  }
+  .pitfall p { font-size: 14.5px; }
+  .pitfall strong { font-weight: 800; }
+
+  /* ---------- 结尾横幅 ---------- */
+  .outro {
+    border-top: 2px solid var(--ink);
+    background: var(--ink);
+    color: var(--bg);
+    padding: 64px 24px;
+    text-align: center;
+  }
+  .outro h2 { font-size: clamp(22px, 4vw, 32px); font-weight: 800; max-width: 640px; margin: 0 auto 12px; }
+  .outro p { color: #aaa; font-size: 14px; }
+  .outro .dots { display: flex; gap: 12px; justify-content: center; margin-bottom: 28px; }
+  .outro .dots span { width: 12px; height: 12px; border-radius: 50% !important; display: inline-block; }
+  .outro .d1 { background: var(--accent); }
+  .outro .d2 { background: var(--accent2); }
+  .outro .d3 { background: var(--bg); }
+
+  footer {
+    text-align: center;
+    padding: 24px;
+    font-size: 12px;
+    color: var(--muted);
+    background: var(--bg);
+    border-top: 1px solid var(--grid);
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ HERO ============ -->
+<header class="hero">
+  <div class="deco-circle"></div>
+  <div class="deco-square"></div>
+  <div class="hero-inner">
+    <span class="tag">MIGRATION GUIDE</span>
+    <h1>Flutter <span class="arrow">→</span> Figma<br>组件迁移地图</h1>
+    <p class="sub">你不需要重新学一套 UI 系统。Figma 的 Auto Layout 与 Flutter 的 Widget 树在底层逻辑上是同构的——把「写代码」换成「拖拽 + 面板配置」，肌肉记忆可以直接平移。</p>
+  </div>
+</header>
+
+<!-- ============ 01 映射表 ============ -->
+<section id="map">
+  <div class="sec-head">
+    <span class="sec-num">01</span>
+    <h2>心智模型对照表</h2>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:30%">Flutter 概念</th>
+          <th style="width:28%">Figma 对应概念</th>
+          <th>一句话说明</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="group"><td colspan="3">结构与复用</td></tr>
+        <tr>
+          <td><span class="fl">Widget</span></td>
+          <td><span class="fg">Component（主组件）</span></td>
+          <td class="note">定义一次，处处复用</td>
+        </tr>
+        <tr>
+          <td><span class="fl">Widget 的实例化调用</span></td>
+          <td><span class="fg">Instance（组件实例）</span></td>
+          <td class="note">复制主组件得到，改主组件所有实例跟着变</td>
+        </tr>
+        <tr>
+          <td><span class="fl">构造函数参数 / props</span></td>
+          <td><span class="fg">Component Properties / Variants</span></td>
+          <td class="note">用 state=default/pressed、size=sm/lg 这类属性切换变体</td>
+        </tr>
+        <tr>
+          <td><span class="fl">Scaffold</span></td>
+          <td><span class="fg">Frame</span></td>
+          <td class="note">一个 Frame ≈ 一个屏幕（如 390×844）</td>
+        </tr>
+        <tr>
+          <td><span class="fl">Widget 组合嵌套</span></td>
+          <td><span class="fg">Frame 嵌套（非 Group）</span></td>
+          <td class="note">Frame 才能带 Auto Layout / Clip / 约束</td>
+        </tr>
+
+        <tr class="group"><td colspan="3">布局</td></tr>
+        <tr>
+          <td><span class="fl">Row</span></td>
+          <td><span class="fg">Auto Layout · Horizontal</span></td>
+          <td class="note">横向排列子元素</td>
+        </tr>
+        <tr>
+          <td><span class="fl">Column</span></td>
+          <td><span class="fg">Auto Layout · Vertical</span></td>
+          <td class="note">纵向排列子元素</td>
+        </tr>
+        <tr>
+          <td><span class="fl">Stack + Positioned</span></td>
+          <td><span class="fg">Frame 内绝对定位</span></td>
+          <td class="note">去掉 Auto Layout，子元素自由摆放</td>
+        </tr>
+        <tr>
+          <td><span class="fl">Wrap</span></td>
+          <td><span class="fg">Auto Layout · Wrap</span></td>
+          <td class="note">自动换行</td>
+        </tr>
+        <tr>
+          <td><span class="fl">Padding</span></td>
+          <td><span class="fg">Auto Layout Padding</span></td>
+          <td class="note">上/右/下/左内边距直接填数字</td>
+        </tr>
+        <tr>
+          <td><span class="fl">spacing: / SizedBox</span></td>
+          <td><span class="fg">Gap</span></td>
+          <td class="note">子元素之间的间距</td>
+        </tr>
+        <tr>
+          <td><span class="fl">mainAxisAlignment / crossAxisAlignment</span></td>
+          <td><span class="fg">对齐（九宫格 + 主轴对齐）</span></td>
+          <td class="note">主轴方向随 Auto Layout 方向变化</td>
+        </tr>
+
+        <tr class="group"><td colspan="3">尺寸与约束</td></tr>
+        <tr>
+          <td><span class="fl">MainAxisSize.min</span></td>
+          <td><span class="fg">Hug contents</span></td>
+          <td class="note">容器被子元素撑开</td>
+        </tr>
+        <tr>
+          <td><span class="fl">Expanded / Flexible</span></td>
+          <td><span class="fg">Fill container</span></td>
+          <td class="note">沿主轴吃掉剩余空间</td>
+        </tr>
+        <tr>
+          <td><span class="fl">SizedBox(width:, height:)</span></td>
+          <td><span class="fg">Fixed</span></td>
+          <td class="note">固定宽高</td>
+        </tr>
+        <tr>
+          <td><span class="fl">MediaQuery / 响应式布局</span></td>
+          <td><span class="fg">Constraints（约束）</span></td>
+          <td class="note">定义子元素相对父 Frame 的拉伸行为</td>
+        </tr>
+        <tr>
+          <td><span class="fl">ListView / SingleChildScrollView</span></td>
+          <td><span class="fg">Clip content + 滚动原型</span></td>
+          <td class="note">溢出即裁剪/滚动</td>
+        </tr>
+
+        <tr class="group"><td colspan="3">主题与令牌</td></tr>
+        <tr>
+          <td><span class="fl">ThemeData</span></td>
+          <td><span class="fg">Styles</span></td>
+          <td class="note">全局命名样式（Color / Text / Effect），改一处全局生效</td>
+        </tr>
+        <tr>
+          <td><span class="fl">AppColors / AppSpacing 常量类</span></td>
+          <td><span class="fg">Variables（设计令牌）</span></td>
+          <td class="note">支持 Color/Number/String/Boolean，可绑定到 padding、圆角、可见性，可导出 JSON</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ============ 02 六个独有概念 ============ -->
+<section id="concepts">
+  <div class="sec-head">
+    <span class="sec-num">02</span>
+    <h2>Figma 独有的 6 个概念</h2>
+  </div>
+  <div class="cards">
+    <div class="card">
+      <span class="idx">/01</span>
+      <div class="glyph g1"></div>
+      <h3>Frame vs Group</h3>
+      <span class="en">FRAME / GROUP</span>
+      <p>Group 只是打包图层，没有尺寸语义；<strong>Frame 才相当于 Flutter 的 Widget</strong>——可设 Auto Layout、裁剪、约束。</p>
+      <div class="analogy">做布局永远用 Frame，别用 Group。</div>
+    </div>
+    <div class="card">
+      <span class="idx">/02</span>
+      <div class="glyph g2"></div>
+      <h3>Component / Instance / Variants</h3>
+      <span class="en">COMPONENT SYSTEM</span>
+      <p>Component ≈ StatelessWidget 类定义；Instance ≈ 调用；Variants ≈ 命名参数，如 <em>type=primary/secondary × state=default/pressed</em>。</p>
+      <div class="analogy">命名用斜杠分层：Button/Primary/MD，资产面板自动生成树形结构。</div>
+    </div>
+    <div class="card">
+      <span class="idx">/03</span>
+      <div class="glyph g3"></div>
+      <h3>三种尺寸模式</h3>
+      <span class="en">HUG / FILL / FIXED</span>
+      <p>内容决定尺寸 → Hug；父容器分配 → Fill；写死像素 → Fixed。同一下拉菜单的三个选项。</p>
+      <div class="analogy">对应 MainAxisSize.min / Expanded / SizedBox。</div>
+    </div>
+    <div class="card">
+      <span class="idx">/04</span>
+      <div class="glyph g4"></div>
+      <h3>Constraints 约束</h3>
+      <span class="en">CONSTRAINTS</span>
+      <p>子元素相对父 Frame 的行为：Left / Right / Center / Scale / 左右同时拉伸。拖宽 Frame，设置正确的元素自动跟着拉伸。</p>
+      <div class="analogy">Figma 版的「自适应」，对应 LayoutBuilder 组合拳。</div>
+    </div>
+    <div class="card">
+      <span class="idx">/05</span>
+      <div class="glyph g5"></div>
+      <h3>Styles vs Variables</h3>
+      <span class="en">DESIGN TOKENS</span>
+      <p>Styles 适合文字/颜色/阴影；Variables 是真·设计令牌，可绑定到 padding、gap、圆角、可见性等。</p>
+      <div class="analogy">从一开始就用 Variables 建令牌，命名对齐 Flutter（color/primary、spacing/16），导出 Dart 常量零翻译成本。</div>
+    </div>
+    <div class="card">
+      <span class="idx">/06</span>
+      <div class="glyph g6"></div>
+      <h3>Layout Grid</h3>
+      <span class="en">LAYOUT GRID</span>
+      <p>叠加在 Frame 上的可视化参考网格（8pt 网格、12 列栅格），只辅助对齐，不参与实际布局。</p>
+      <div class="analogy">关键区别：它是标尺，不是 Auto Layout。</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 03 迁移路径 ============ -->
+<section id="path">
+  <div class="sec-head">
+    <span class="sec-num">03</span>
+    <h2>三步迁移路径</h2>
+  </div>
+  <div class="steps">
+    <div class="step">
+      <div class="n"></div>
+      <div>
+        <h3>用 Auto Layout 复刻一段你写过的布局</h3>
+        <p>比如「头像 40×40 + 标题/副标题占满 + 右侧箭头」的列表项：外层 Frame 横向 + Padding 16 + Gap 12；头像 Fixed 40×40；文字区纵向 + Gap 4 + 宽度 <span class="mono">Fill</span>。一一对应你的 <span class="mono">Row → SizedBox → Expanded → Icon</span>。</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="n"></div>
+      <div>
+        <h3>用 Variants 重建一个组件状态机</h3>
+        <p>做一个 Button 组件，定义 <span class="mono">type</span> × <span class="mono">state</span> 共 6 个 Variant。把过去写 <span class="mono">MyButton(type:, onPressed:, enabled:)</span> 的「参数思维」迁移到「变体思维」就到位了。</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="n"></div>
+      <div>
+        <h3>建立 Variables 令牌库</h3>
+        <p>照 <span class="mono">ThemeData</span> 的结构建：<span class="mono">color/primary</span>、<span class="mono">typography/heading/1</span>、<span class="mono">spacing/4/8/16/24</span>、<span class="mono">radius/md</span>。命名对齐 Flutter，未来导出 JSON 转 Dart 常量几乎是直接复制。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 04 陷阱清单 ============ -->
+<section id="pitfalls">
+  <div class="sec-head">
+    <span class="sec-num">04</span>
+    <h2>新手陷阱清单</h2>
+  </div>
+  <div class="pitfalls">
+    <div class="pitfall">
+      <span class="x">✕</span>
+      <p><strong>不要用 Group 做布局</strong> —— 只用 Frame + Auto Layout，否则一切响应式都会失效。</p>
+    </div>
+    <div class="pitfall">
+      <span class="x">✕</span>
+      <p><strong>不要手动拖 x/y 坐标对齐</strong> —— 横/纵关系的元素一律用 Auto Layout，等于不要什么都套 Stack + Positioned。</p>
+    </div>
+    <div class="pitfall">
+      <span class="x">✕</span>
+      <p><strong>先建 Variables 再画界面</strong> —— 不然做到一半要改主题色，会哭。</p>
+    </div>
+    <div class="pitfall">
+      <span class="x">✕</span>
+      <p><strong>组件命名用斜杠分层</strong> —— Button/Primary/LG 而不是 primary_button_large。</p>
+    </div>
+    <div class="pitfall">
+      <span class="x">✕</span>
+      <p><strong>多用 Fill 而不是 Fixed</strong> —— 这是 Flutter「约束思维」带来的天然优势，很多设计师反而会写死宽度。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ OUTRO ============ -->
+<div class="outro">
+  <div class="dots"><span class="d1"></span><span class="d2"></span><span class="d3"></span></div>
+  <h2>最难的是布局思维——你已经在 Flutter 里练过了</h2>
+  <p>整个迁移通常 1–2 周完成主力切换，剩下只是图形编辑、原型交互与协作交付这些纯工具层面的事。</p>
+</div>
+
+<footer>
+  Flutter → Figma Migration Map · 部署于 GitHub Pages
+</footer>
+
+</body>
+</html>
